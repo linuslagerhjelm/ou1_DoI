@@ -16,7 +16,7 @@ public class ChatClientGUI extends JFrame {
     private final NameServerPanel nameServerPanel = new NameServerPanel();
 
     public ChatClientGUI() {
-        super("Chat!");
+        super("Chat client gui!");
         setSize(800, 600);
         add(tabs);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
