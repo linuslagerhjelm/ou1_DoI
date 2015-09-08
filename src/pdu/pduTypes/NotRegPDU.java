@@ -1,6 +1,6 @@
 package pdu.pduTypes;
 
-import se.umu.cs.datakom.ht15.chatServer.given.pdu.PDU;
+import pdu.PDU;
 
 public class NotRegPDU extends PDU {
 
