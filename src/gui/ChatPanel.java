@@ -23,7 +23,7 @@ public class ChatPanel extends JPanel {
     private JTextArea receivedMessages = new JTextArea();
     private JTextField messageInputField = new JTextField();
     private JButton sendButton = new JButton("Send");
-    private DefaultListModel<String> memberListModel = new DefaultListModel<>();
+    private DefaultListModel<String> memberListModel = new DefaultListModel<String>();
     private JTextField nickField;
     private JButton changeNickButton;
     private JButton closeButton;
@@ -61,7 +61,7 @@ public class ChatPanel extends JPanel {
         JPanel sideBar = new JPanel(new BorderLayout());
         sideBar.setPreferredSize(new Dimension(300, 0));
 
-        JList<String> memberList = new JList<>(memberListModel);
+        JList<String> memberList = new JList<String>(memberListModel);
         sideBar.add(new JScrollPane(memberList), BorderLayout.CENTER);
 
         JPanel buttonsPanel = new JPanel(new GridLayout(2, 1));
