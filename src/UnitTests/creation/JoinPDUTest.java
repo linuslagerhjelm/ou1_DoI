@@ -1,11 +1,8 @@
 package UnitTests.creation;
 
-//import org.junit.Assert;
-//import org.junit.Test;
-
-import UnitTests.AllPDUTests;
 import org.junit.Assert;
 import org.junit.Test;
+import UnitTests.AllPDUTests;
 import pdu.OpCode;
 import pdu.PDU;
 import pdu.pduTypes.JoinPDU;
