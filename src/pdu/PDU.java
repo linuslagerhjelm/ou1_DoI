@@ -1,5 +1,7 @@
 package pdu;
 
+import pdu.pduTypes.RegPDU;
+
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -20,7 +22,9 @@ public abstract class PDU {
      *          doesn't represent a correct OpCode.
      */
     public static PDU fromInputStream(InputStream inStream) throws IOException {
-        throw new UnsupportedOperationException("Not yet implemented");
+
+        //TODO: implement switch-case to instantiate correct PDU
+        return null;
     }
 
     /**
