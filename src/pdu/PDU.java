@@ -1,9 +1,17 @@
 package pdu;
 
+import pdu.pduTypes.JoinPDU;
+import pdu.pduTypes.NicksPDU;
 import pdu.pduTypes.RegPDU;
 
+
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Super class of all PDUs with methods for reading PDUs from InputStreams.
@@ -23,7 +31,16 @@ public abstract class PDU {
      */
     public static PDU fromInputStream(InputStream inStream) throws IOException {
 
-        //TODO: implement switch-case to instantiate correct PDU
+        byte[] inputBytes = inStreamToByteArray(inStream);
+        switch(inputBytes[0]){
+            case 12:
+                byte[] dataSubstring = Arrays.copyOfRange(inputBytes, 4, inputBytes.length);
+                return new JoinPDU(dataSubstring.toString());
+            case 19:
+                Set<String> nicknames = getNicknamesFromByteArray(inputBytes);
+                return new NicksPDU(nicknames);
+        }
+
         return null;
     }
 
@@ -96,5 +113,37 @@ public abstract class PDU {
             result += ((long) bytes[i]) & 0xff;
         }
         return result;
+    }
+
+    //TODO: Put methods below here in separate class
+    private static byte[] inStreamToByteArray(InputStream in) throws IOException {
+
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+
+        int nRead;
+        byte[] data = new byte[16384];
+
+        while ((nRead = in.read(data, 0, data.length)) != -1) {
+            buffer.write(data, 0, nRead);
+        }
+
+        buffer.flush();
+
+        return buffer.toByteArray();
+
+    }
+
+    private static Set<String> getNicknamesFromByteArray(byte[] stream){
+        Set<String> returnSet = new HashSet<>();
+        StringBuilder temp = new StringBuilder();
+        for(int i = 3; i < stream.length; ++i){
+            temp.append(stream[i]);
+
+            if(stream[i] == '\0'){
+                returnSet.add(temp.toString());
+                temp = new StringBuilder();
+            }
+        }
+        return returnSet;
     }
 }
