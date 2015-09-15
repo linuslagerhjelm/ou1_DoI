@@ -5,6 +5,8 @@ import pdu.PDU;
 public class RegPDU extends PDU {
 
     public RegPDU(String serverName, short port) {
+
+
     }
 
     @Override
