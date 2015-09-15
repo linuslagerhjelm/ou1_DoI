@@ -86,7 +86,7 @@ public class MessagePDU extends PDU {
         //Try to write timestamp. Else write 0 (4 bytes)
         try{
             try {
-                byte[] time = timestamp.toString().getBytes();
+                byte[] time = (""+(timestamp.getTime()/1000)).getBytes();
                 outputStream.write(time);
                 outputStream.write(
                         new byte[PDU.padLengths(time.length)-time.length]);

@@ -1,5 +1,6 @@
 package pdu.pduTypes;
 
+import pdu.ByteSequenceBuilder;
 import pdu.OpCode;
 import pdu.PDU;
 
@@ -27,28 +28,28 @@ public class NicksPDU extends PDU {
 
     @Override
     public byte[] toByteArray() {
-        ByteArrayOutputStream outputByteArray = new ByteArrayOutputStream();
+        ByteSequenceBuilder outputByteStream = new ByteSequenceBuilder();
         byte[] nickBytes = nicknames.toString().getBytes(UTF_8);
 
         //write OpCode
-        outputByteArray.write(OpCode.NICKS.value);
+        outputByteStream.append(OpCode.NICKS.value);
 
         //Write number of nicknames
-        outputByteArray.write(nicknames.size());
+        outputByteStream.append((byte)nicknames.size());
+
+        //write nickname array length
+        outputByteStream.append((byte)nickBytes.length);
+        if(nickBytes.length < 256)
+            outputByteStream.append(new byte[1]);
 
         //write nicknames
-        try {
-            for (String nickname: nicknames) {
-                outputByteArray.write(nickname.getBytes(UTF_8));
-                outputByteArray.write(new byte[1]);
-            }
-            outputByteArray.write(new byte[PDU.padLengths(nickBytes.length)-
-                    nickBytes.length]);
-        } catch (IOException e) {
-            e.printStackTrace();
+        for(String nickname: nicknames){
+            outputByteStream.append(nickname.getBytes());
+            outputByteStream.append("\0".getBytes());
         }
+        outputByteStream.pad();
 
-        byte[] returnArray = outputByteArray.toByteArray();
+        byte[] returnArray = outputByteStream.toByteArray();
 
         return returnArray;
     }
