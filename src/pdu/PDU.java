@@ -17,6 +17,7 @@ import java.util.Set;
  * Super class of all PDUs with methods for reading PDUs from InputStreams.
  */
 public abstract class PDU {
+    private static byte[] inputStream;
 
     /**
      * Reads the OpCode from the InputStream and determines the type of
@@ -32,6 +33,8 @@ public abstract class PDU {
     public static PDU fromInputStream(InputStream inStream) throws IOException {
 
         byte[] inputBytes = inStreamToByteArray(inStream);
+        inputStream = inputBytes;
+
         switch(inputBytes[0]){
             case 12:
                 byte[] dataSubstring = Arrays.copyOfRange(inputBytes, 4, inputBytes.length);
@@ -42,6 +45,24 @@ public abstract class PDU {
         }
 
         return null;
+    }
+    @Override
+    public boolean equals( Object obj){
+        if ( this == obj )
+            return true;
+        if ( obj == null )
+            return false;
+        if ( getClass() != obj.getClass() )
+            return false;
+        PDU other = (PDU) obj;
+        if ( inputStream == null )
+        {
+            if ( other.inputStream != null )
+                return false;
+        }
+        else if ( !inputStream.equals( other.inputStream ) )
+            return false;
+        return true;
     }
 
     /**

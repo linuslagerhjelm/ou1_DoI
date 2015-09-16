@@ -1,7 +1,8 @@
 package UnitTests.creation;
 
-import org.junit.Test;
+
 import UnitTests.AllPDUTests;
+import org.testng.annotations.Test;
 import pdu.OpCode;
 import pdu.PDU;
 import pdu.pduTypes.UJoinPDU;

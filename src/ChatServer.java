@@ -25,7 +25,7 @@ public class ChatServer {
 
         DatagramPacket dataPacket = new DatagramPacket(buffer, buffer.length);
 
-        PDU.fromInputStream(InputStream.)
+        //PDU.fromInputStream(InputStream.)
 
         while (true) {
             dataSocket.receive(dataPacket);
