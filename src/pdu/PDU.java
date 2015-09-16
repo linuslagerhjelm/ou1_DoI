@@ -1,17 +1,19 @@
 package pdu;
 
+import com.sun.corba.se.spi.activation.Server;
 import pdu.pduTypes.JoinPDU;
 import pdu.pduTypes.NicksPDU;
 import pdu.pduTypes.RegPDU;
+import pdu.pduTypes.SListPDU;
 
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.nio.charset.Charset;
+import java.util.*;
 
 /**
  * Super class of all PDUs with methods for reading PDUs from InputStreams.
@@ -36,9 +38,13 @@ public abstract class PDU {
         inputStream = inputBytes;
 
         switch(inputBytes[0]){
+            case 4:
+                byte seqNo = inputBytes[1];
+                SListPDU.ServerEntry[] servers = getServerEntries(inputBytes);
+                return new SListPDU(seqNo, servers);
             case 12:
-                byte[] dataSubstring = Arrays.copyOfRange(inputBytes, 4, inputBytes.length);
-                return new JoinPDU(dataSubstring.toString());
+                byte[] nickname = Arrays.copyOfRange(inputBytes, 4, inputBytes.length);
+                return new JoinPDU(nickname.toString());
             case 19:
                 Set<String> nicknames = getNicknamesFromByteArray(inputBytes);
                 return new NicksPDU(nicknames);
@@ -166,5 +172,44 @@ public abstract class PDU {
             }
         }
         return returnSet;
+    }
+
+    private static SListPDU.ServerEntry[] getServerEntries(byte[] stream){
+        List<SListPDU.ServerEntry> servers = new ArrayList<>();
+        int serversRead = 0;
+
+        for(int i = 4; i < stream.length; ++i){
+            InetAddress address = null;
+            short port;
+            byte clientCount;
+            String serverName;
+
+            try {
+                address = InetAddress.getByAddress( Arrays.copyOfRange(stream, i, i+4));
+            } catch (UnknownHostException e) {
+                e.printStackTrace();
+            }
+            i += 4;
+
+            port = (short) PDU.byteArrayToLong(stream, i, i+2);
+            i += 2;
+            clientCount = stream[i];
+            ++i;
+            int serverNamLength = stream[i];
+            ++i;
+            serverName = new String(Arrays.copyOfRange(stream, i, i+serverNamLength), Charset.forName("utf-8"));
+            i += serverNamLength;
+            servers.add(new SListPDU.ServerEntry(address, port, clientCount, serverName));
+            ++serversRead;
+            if(serversRead == stream[4])
+                break;
+        }
+        SListPDU.ServerEntry[] returnArray = new SListPDU.ServerEntry[servers.size()];
+
+        for(int i = 0; i < servers.size(); ++i){
+            returnArray[i] = servers.get(i);
+        }
+
+        return returnArray;
     }
 }

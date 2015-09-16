@@ -3,6 +3,7 @@ package pdu.pduTypes;
 import pdu.Checksum;
 import pdu.OpCode;
 import pdu.PDU;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -32,7 +33,7 @@ public class MessagePDU extends PDU {
 
     @Override
     public byte[] toByteArray() {
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
+        /*ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
         byte[] input = this.message.getBytes();
         byte[] pad = new byte[1];
 
@@ -128,10 +129,9 @@ public class MessagePDU extends PDU {
             }
         }
 
-
-
         byte[] byteArray = outputStream.toByteArray();
         byteArray[3] = Checksum.computeChecksum(byteArray);
-        return byteArray;
+        return byteArray;*/
+        throw new NotImplementedException();
     }
 }

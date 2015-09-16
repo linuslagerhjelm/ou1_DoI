@@ -1,6 +1,5 @@
 package pdu.pduTypes;
 
-import com.sun.corba.se.spi.activation.Server;
 import pdu.ByteSequenceBuilder;
 import pdu.OpCode;
 import pdu.PDU;
@@ -22,10 +21,16 @@ public class SListPDU extends PDU {
     @Override
     public byte[] toByteArray() {
         ByteSequenceBuilder outputByteStream = new ByteSequenceBuilder();
-
         outputByteStream.append(OpCode.SLIST.value);
         outputByteStream.append(seqNo);
 
+        if(entries.size() < 256)
+            outputByteStream.append(new byte[1]);
+
+        outputByteStream.append((byte)entries.size());
+        for(ServerEntry server: entries) {
+            outputByteStream.append(server.toByteArray());
+        }
 
         return outputByteStream.toByteArray();
     }
@@ -33,6 +38,9 @@ public class SListPDU extends PDU {
     public static class ServerEntry {
 
         public final String serverName;
+        private InetAddress address;
+        private short port;
+        private byte clientCount;
 
         public ServerEntry(
                 InetAddress address,
@@ -40,6 +48,22 @@ public class SListPDU extends PDU {
                 byte clientCount,
                 String serverName) {
             this.serverName = serverName;
+            this.address = address;
+            this.port = port;
+            this.clientCount = clientCount;
+        }
+
+        public byte[] toByteArray(){
+            ByteSequenceBuilder byteArray = new ByteSequenceBuilder();
+
+            byteArray.append(address.getAddress());
+            byteArray.append((byte)port);
+            byteArray.append(clientCount);
+            byteArray.append((byte)serverName.getBytes().length);
+            byteArray.append(serverName.getBytes());
+            byteArray.pad();
+
+            return byteArray.toByteArray();
         }
     }
 }
