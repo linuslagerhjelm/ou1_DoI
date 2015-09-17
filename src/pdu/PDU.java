@@ -1,10 +1,7 @@
 package pdu;
 
 import com.sun.corba.se.spi.activation.Server;
-import pdu.pduTypes.JoinPDU;
-import pdu.pduTypes.NicksPDU;
-import pdu.pduTypes.RegPDU;
-import pdu.pduTypes.SListPDU;
+import pdu.pduTypes.*;
 
 
 import java.io.ByteArrayOutputStream;
@@ -38,19 +35,37 @@ public abstract class PDU {
         inputStream = inputBytes;
 
         switch(inputBytes[0]){
+            case 0:
+                return null;
+            case 1:
+                return new AckPDU(inputBytes);
+            case 2:
+                return new AlivePDU(inputBytes);
+            case 3:
+                return new GetListPDU();
             case 4:
-                byte seqNo = inputBytes[1];
-                SListPDU.ServerEntry[] servers = getServerEntries(inputBytes);
-                return new SListPDU(seqNo, servers);
+                return new SListPDU(inputBytes);
+            case 10:
+                return new MessagePDU(inputBytes);
+            case 11:
+                return null;
             case 12:
-                byte[] nickname = Arrays.copyOfRange(inputBytes, 4, inputBytes.length);
-                return new JoinPDU(nickname.toString());
+                return new JoinPDU(inputBytes);
+            case 13:
+                return new ChNickPDU(inputBytes);
+            case 16:
+                return new UJoinPDU(inputBytes);
+            case 17:
+                return new ULeavePDU(inputBytes);
+            case 18:
+                return null;
             case 19:
-                Set<String> nicknames = getNicknamesFromByteArray(inputBytes);
-                return new NicksPDU(nicknames);
+                return new NicksPDU(inputBytes);
+            case 100:
+                return new NotRegPDU();
+            default:
+                return null;
         }
-
-        return null;
     }
     @Override
     public boolean equals( Object obj){
@@ -142,74 +157,46 @@ public abstract class PDU {
         return result;
     }
 
-    //TODO: Put methods below here in separate class
-    private static byte[] inStreamToByteArray(InputStream in) throws IOException {
+    public static byte[] inStreamToByteArray(InputStream in) {
 
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
         int nRead;
         byte[] data = new byte[16384];
-
-        while ((nRead = in.read(data, 0, data.length)) != -1) {
-            buffer.write(data, 0, nRead);
-        }
-
-        buffer.flush();
-
+        try {
+            while ((nRead = in.read(data, 0, data.length)) != -1) {
+                buffer.write(data, 0, nRead);
+            }
+            buffer.flush();
+        } catch (IOException e){
+            e.getMessage();
+        } catch (Exception e){}
         return buffer.toByteArray();
-
+    }
+    /**
+     * Converts a 4 byte array of unsigned bytes to an long
+     * @param b an array of 4 unsigned bytes
+     * @return a long representing the unsigned int
+     */
+    public static long unsignedIntToLong(byte[] in)
+    {
+        byte[] b = in;
+        long l = 0;
+        l |= b[0] & 0xFF;
+        l <<= 8;
+        l |= b[1] & 0xFF;
+        l <<= 8;
+        l |= b[2] & 0xFF;
+        l <<= 8;
+        l |= b[3] & 0xFF;
+        return l;
     }
 
-    private static Set<String> getNicknamesFromByteArray(byte[] stream){
-        Set<String> returnSet = new HashSet<>();
-        StringBuilder temp = new StringBuilder();
-        for(int i = 3; i < stream.length; ++i){
-            temp.append(stream[i]);
-
-            if(stream[i] == '\0'){
-                returnSet.add(temp.toString());
-                temp = new StringBuilder();
-            }
-        }
-        return returnSet;
-    }
-
-    private static SListPDU.ServerEntry[] getServerEntries(byte[] stream){
-        List<SListPDU.ServerEntry> servers = new ArrayList<>();
-        int serversRead = 0;
-
-        for(int i = 4; i < stream.length; ++i){
-            InetAddress address = null;
-            short port;
-            byte clientCount;
-            String serverName;
-
-            try {
-                address = InetAddress.getByAddress( Arrays.copyOfRange(stream, i, i+4));
-            } catch (UnknownHostException e) {
-                e.printStackTrace();
-            }
-            i += 4;
-
-            port = (short) PDU.byteArrayToLong(stream, i, i+2);
-            i += 2;
-            clientCount = stream[i];
-            ++i;
-            int serverNamLength = stream[i];
-            ++i;
-            serverName = new String(Arrays.copyOfRange(stream, i, i+serverNamLength), Charset.forName("utf-8"));
-            i += serverNamLength;
-            servers.add(new SListPDU.ServerEntry(address, port, clientCount, serverName));
-            ++serversRead;
-            if(serversRead == stream[4])
-                break;
-        }
-        SListPDU.ServerEntry[] returnArray = new SListPDU.ServerEntry[servers.size()];
-
-        for(int i = 0; i < servers.size(); ++i){
-            returnArray[i] = servers.get(i);
-        }
-
-        return returnArray;
+    public static int byteArrayToInt(byte[] b)
+    {
+        return   b[3] & 0xFF |
+                (b[2] & 0xFF) << 8 |
+                (b[1] & 0xFF) << 16 |
+                (b[0] & 0xFF) << 24;
     }
 }

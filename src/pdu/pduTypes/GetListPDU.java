@@ -1,6 +1,8 @@
 package pdu.pduTypes;
 
 
+import pdu.ByteSequenceBuilder;
+import pdu.OpCode;
 import pdu.PDU;
 
 public class GetListPDU extends PDU {
@@ -9,6 +11,9 @@ public class GetListPDU extends PDU {
 
     @Override
     public byte[] toByteArray() {
-        throw new UnsupportedOperationException("Not yet implemented");
+        ByteSequenceBuilder outputByteStream = new ByteSequenceBuilder();
+        outputByteStream.append(OpCode.GETLIST.value);
+        outputByteStream.pad();
+        return outputByteStream.toByteArray();
     }
 }

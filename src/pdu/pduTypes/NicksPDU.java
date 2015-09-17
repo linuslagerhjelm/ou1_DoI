@@ -12,6 +12,10 @@ public class NicksPDU extends PDU {
 
     private Set<String> nicknames = new HashSet<>();
 
+    public NicksPDU(byte[] inStream){
+        this.nicknames = getNicknamesFromByteArray(inStream);
+    }
+
     public NicksPDU(Collection<String> nicknames) {
         this.nicknames.addAll(nicknames);
     }
@@ -49,5 +53,19 @@ public class NicksPDU extends PDU {
 
     public Set<String> getNicknames() {
         return this.nicknames;
+    }
+
+    private static Set<String> getNicknamesFromByteArray(byte[] stream){
+        Set<String> returnSet = new HashSet<>();
+        StringBuilder temp = new StringBuilder();
+        for(int i = 3; i < stream.length; ++i){
+            temp.append(stream[i]);
+
+            if(stream[i] == '\0'){
+                returnSet.add(temp.toString());
+                temp = new StringBuilder();
+            }
+        }
+        return returnSet;
     }
 }

@@ -28,7 +28,7 @@ public class StreamTest {
     }
 
 
-    @Test(timeout = 10000)
+    @Test(timeout = 2000)
     public void shouldReadOnePDUOneByteAtATime() throws Exception {
         PDU pdu = new NicksPDU("Pelle", "Johan", "Anna");
         new Thread(
@@ -49,7 +49,7 @@ public class StreamTest {
         assertEquals(pdu, inPdu);
     }
 
-    @Test(timeout = 10000)
+    @Test(timeout = 2000)
     public void shouldReadSeveralConsecutivePDUs() throws Exception {
         PDU[] pdus = {
                 new QuitPDU(),

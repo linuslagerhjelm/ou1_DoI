@@ -4,10 +4,10 @@ import pdu.ByteSequenceBuilder;
 import pdu.Checksum;
 import pdu.OpCode;
 import pdu.PDU;
-import java.lang.Long;
 
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.Date;
 
 /**
@@ -18,6 +18,20 @@ public class MessagePDU extends PDU {
     String message;
     String nickname;
     Date timestamp;
+
+    public MessagePDU(byte[] inStream){
+        int messageLength = Integer.parseInt(""+inStream[4]+inStream[5]);
+        byte[] messByte = Arrays.copyOfRange(inStream, 12, messageLength);
+        this.message = messByte.toString();
+
+        //determines if call comes from server or client
+        if(inStream[2] != 0){
+            byte[] timestamp = Arrays.copyOfRange(inStream, 4, 8);
+            this.timestamp = new Date(unsignedIntToLong(timestamp));
+            this.nickname = Arrays.copyOfRange(inStream,
+                    inStream.length-messageLength, inStream.length).toString();
+        }
+    }
 
     public MessagePDU(String message) {
         this.message = message;
@@ -46,31 +60,23 @@ public class MessagePDU extends PDU {
             outputByteStream.append(new byte[1]);
         }
 
-        //Check sum
         outputByteStream.append(new byte[1]);
-
-        if(message.getBytes().length < 256)
-            outputByteStream.append(new byte[1]);
-
-        outputByteStream.append((byte)message.getBytes().length);
-
+        outputByteStream.appendShort((byte)message.getBytes().length);
         outputByteStream.append(new byte[2]);
 
         try{
             outputByteStream.append(getTimestampFromDate(timestamp));
-            outputByteStream.pad();
         } catch (NullPointerException e){
             outputByteStream.append(new byte[4]);
         }
 
         outputByteStream.append(messageBytes);
-        outputByteStream.pad();
 
         try{
             outputByteStream.append(this.nickname.getBytes());
             outputByteStream.pad();
         } catch (NullPointerException e){
-            outputByteStream.append(new byte[4]);
+
         }
 
         byte[] byteArray = outputByteStream.toByteArray();
