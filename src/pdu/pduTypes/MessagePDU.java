@@ -1,12 +1,13 @@
 package pdu.pduTypes;
 
+import pdu.ByteSequenceBuilder;
 import pdu.Checksum;
 import pdu.OpCode;
 import pdu.PDU;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+import java.lang.Long;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+
+import java.nio.ByteBuffer;
 import java.util.Date;
 
 /**
@@ -33,105 +34,59 @@ public class MessagePDU extends PDU {
 
     @Override
     public byte[] toByteArray() {
-        /*ByteArrayOutputStream outputStream = new ByteArrayOutputStream( );
-        byte[] input = this.message.getBytes();
-        byte[] pad = new byte[1];
+        ByteSequenceBuilder outputByteStream = new ByteSequenceBuilder();
+        byte[] messageBytes = this.message.getBytes();
 
-        //Write Op-code (1 byte)
-        outputStream.write(OpCode.MESSAGE.value);
+        outputByteStream.append(OpCode.MESSAGE.value);
+        outputByteStream.append(new byte[1]);
 
-        //Add padding (1 byte)
-        try {
-            outputStream.write(pad);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        //Try to add nick length. Else pad (1 byte)
-        try {
-            outputStream.write(this.nickname.getBytes().length);
+        try{
+            outputByteStream.append((byte) this.nickname.getBytes().length);
         } catch (NullPointerException e){
-            try {
-                outputStream.write(pad);
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
+            outputByteStream.append(new byte[1]);
         }
 
-        //Add placeholder for checksum (calculated at the end) (1 byte)
-        try {
-            outputStream.write(new byte[1]);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        //Check sum
+        outputByteStream.append(new byte[1]);
 
+        if(message.getBytes().length < 256)
+            outputByteStream.append(new byte[1]);
 
-        //Write message length. Adds padding if necessary (2 bytes)
-        try {
-            outputStream.write(message.getBytes().length);
-            if(message.getBytes().length < 256){
-                outputStream.write(pad);
-            }
+        outputByteStream.append((byte)message.getBytes().length);
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        outputByteStream.append(new byte[2]);
 
-        //Add padding of 2 bytes
-        try {
-            outputStream.write(new byte[2]);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        //Try to write timestamp. Else write 0 (4 bytes)
         try{
-            try {
-                byte[] time = (""+(timestamp.getTime()/1000)).getBytes();
-                outputStream.write(time);
-                outputStream.write(
-                        new byte[PDU.padLengths(time.length)-time.length]);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } catch (NullPointerException e) {
-            try {
-                outputStream.write(new byte[4]);
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
+            outputByteStream.append(getTimestampFromDate(timestamp));
+            outputByteStream.pad();
+        } catch (NullPointerException e){
+            outputByteStream.append(new byte[4]);
         }
 
-        //Write message
-        try {
-            outputStream.write(input);
-            outputStream.write(
-                    new byte[PDU.padLengths(input.length)-input.length]);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        outputByteStream.append(messageBytes);
+        outputByteStream.pad();
 
-        //write nickname
         try{
-            try {
-                outputStream.write(this.nickname.getBytes());
-                outputStream.write(new byte[PDU.padLengths(
-                        this.nickname.getBytes().length)-
-                        this.nickname.getBytes().length]);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }catch (NullPointerException e){
-            try {
-                outputStream.write(new byte[4]);
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
+            outputByteStream.append(this.nickname.getBytes());
+            outputByteStream.pad();
+        } catch (NullPointerException e){
+            outputByteStream.append(new byte[4]);
         }
 
-        byte[] byteArray = outputStream.toByteArray();
+        byte[] byteArray = outputByteStream.toByteArray();
         byteArray[3] = Checksum.computeChecksum(byteArray);
-        return byteArray;*/
-        throw new NotImplementedException();
+        return byteArray;
+
+    }
+
+    private byte[] getTimestampFromDate(Date date){
+        if(null == date){
+            throw new NullPointerException();
+        }
+
+        int dateInSec = (int) (date.getTime() / 1000);
+        byte[] bytes = ByteBuffer.allocate(4).putInt(dateInSec).array();
+
+        return bytes;
     }
 }
