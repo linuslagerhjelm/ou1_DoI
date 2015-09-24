@@ -28,7 +28,8 @@ public class ChNickPDU extends PDU {
         outputByteStream.append(OpCode.CHNICK.value);
         outputByteStream.append((byte)nickname.getBytes(UTF_8).length);
         outputByteStream.append(new byte[4]);
-        outputByteStream.append(nickname.getBytes());
+        outputByteStream.append(nickname.getBytes(UTF_8));
+        outputByteStream.pad();
 
         return outputByteStream.toByteArray();
     }
