@@ -7,6 +7,8 @@ import UnitTests.streaming.StreamTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import pdu.PDU;
+import pdu.pduTypes.GetListPDU;
+import pdu.pduTypes.QuitPDU;
 
 
 import java.io.ByteArrayInputStream;
@@ -19,6 +21,14 @@ import static org.junit.Assert.assertEquals;
 @SuppressWarnings("OverlyCoupledClass")
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
+        AckPDUTest.class,
+        AlivePDUTest.class,
+        ChNickPDUTest.class,
+        GetListPDUTest.class,
+        NotRegPDUTest.class,
+        QuitPDUTest.class,
+        RegPDUTest.class,
+        UCHNickPDUTest.class,
         JoinPDUTest.class,
         MessagePDUTest.class,
         NicksPDUTest.class,

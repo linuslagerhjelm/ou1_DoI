@@ -1,3 +1,5 @@
+package server;
+
 import pdu.PDU;
 
 import java.io.IOException;
@@ -11,7 +13,8 @@ import java.net.InetAddress;
  */
 public class ChatServer {
 
-
+    private int clientCount;
+    private short id;
     Integer port;
 
     byte[] buffer = new byte[65536];
@@ -25,7 +28,9 @@ public class ChatServer {
 
         DatagramPacket dataPacket = new DatagramPacket(buffer, buffer.length);
 
-        //PDU.fromInputStream(InputStream.)
+        SendHeartBeatThread sendHb = new SendHeartBeatThread(address,port,this);
+        Thread sendHeartbeat = new Thread(sendHb);
+        sendHeartbeat.start();
 
         while (true) {
             dataSocket.receive(dataPacket);
@@ -35,11 +40,8 @@ public class ChatServer {
 
 
     }
-
-    public void sendHeartBeat() {
-
-
-    }
+    public int nrOfConnectedClients(){ return clientCount; }
+    public short getId(){ return id; }
 }
 
 

@@ -36,7 +36,7 @@ public abstract class PDU {
 
         switch(inputBytes[0]){
             case 0:
-                return null;
+                return new RegPDU(inputBytes);
             case 1:
                 return new AckPDU(inputBytes);
             case 2:
@@ -48,7 +48,7 @@ public abstract class PDU {
             case 10:
                 return new MessagePDU(inputBytes);
             case 11:
-                return null;
+                return new QuitPDU();
             case 12:
                 return new JoinPDU(inputBytes);
             case 13:
@@ -58,7 +58,7 @@ public abstract class PDU {
             case 17:
                 return new ULeavePDU(inputBytes);
             case 18:
-                return null;
+                return new UCNickPDU(inputBytes);
             case 19:
                 return new NicksPDU(inputBytes);
             case 100:
@@ -198,5 +198,11 @@ public abstract class PDU {
                 (b[2] & 0xFF) << 8 |
                 (b[1] & 0xFF) << 16 |
                 (b[0] & 0xFF) << 24;
+    }
+
+    public static int byteArrayToShort(byte[] b)
+    {
+        return   b[1] & 0xFF |
+                (b[0] & 0xFF) << 8;
     }
 }

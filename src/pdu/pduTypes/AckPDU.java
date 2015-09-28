@@ -12,8 +12,10 @@ public class AckPDU extends PDU {
     private int id;
 
     public AckPDU(byte[] inStream){
-        byte[] temp = Arrays.copyOfRange(inStream, 3, inStream.length);
-        this.id = byteArrayToInt(temp);
+        ByteSequenceBuilder temp = new ByteSequenceBuilder();
+        temp.append(Arrays.copyOfRange(inStream, 3, inStream.length));
+        temp.pad();
+        this.id = byteArrayToInt(temp.toByteArray());
     }
 
     public AckPDU(short id) {
@@ -25,7 +27,7 @@ public class AckPDU extends PDU {
         ByteSequenceBuilder outputByteStream = new ByteSequenceBuilder();
 
         outputByteStream.append(OpCode.ACK.value);
-        outputByteStream.pad();
+        outputByteStream.append(new byte[1]);
 
         if(this.id < 256)
             outputByteStream.append(new byte[1]);

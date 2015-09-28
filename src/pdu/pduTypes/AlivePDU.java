@@ -12,7 +12,10 @@ public class AlivePDU extends PDU {
 
     public AlivePDU(byte[] inStream){
         this.clientCount = inStream[1];
-        this.id = Short.parseShort(Arrays.copyOfRange(inStream,2,4).toString());
+        if(inStream[2] == 0)
+            this.id = (short)inStream[3];
+        else
+            this.id =(byte)PDU.byteArrayToInt(Arrays.copyOfRange(inStream,2,4));
     }
 
     public AlivePDU(byte clientCount, short id) {
