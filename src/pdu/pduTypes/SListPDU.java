@@ -80,8 +80,6 @@ public class SListPDU extends PDU {
 
     private Set<ServerEntry> priv_getServerEntries(byte[] stream){
         Set<ServerEntry> servers = new HashSet<>();
-        int position = 4;
-
         InputStream inputStream = new ByteArrayInputStream(stream);
 
         try {
@@ -104,7 +102,7 @@ public class SListPDU extends PDU {
                 Byte b = new Byte(readExactly(inputStream, 1)[0]);
                 int serverNameLength = b.intValue();
 
-                serverName = readExactly(inputStream, serverNameLength).toString();
+                serverName = new String(readExactly(inputStream, serverNameLength), "UTF-8");
                 servers.add(new ServerEntry(address, port, clientCount, serverName));
             } catch (IOException e) {
                 e.printStackTrace();
@@ -112,34 +110,6 @@ public class SListPDU extends PDU {
 
         }
 
-        /*for(int i = 4; i < stream.length; ++i){
-            InetAddress address = null;
-            short port;
-            byte clientCount;
-            String serverName;
-
-            try {
-                address = InetAddress.getByAddress( Arrays.copyOfRange(stream, i, i+4));
-            } catch (UnknownHostException e) {
-                e.printStackTrace();
-            }
-            i += 4;
-
-            port = (short) PDU.byteArrayToLong(stream, i, i+2);
-            i += 2;
-            clientCount = stream[i];
-            ++i;
-            int serverNamLength = stream[i];
-            ++i;
-            serverName = new String(Arrays.copyOfRange(stream, i, i+serverNamLength), Charset.forName("utf-8"));
-
-            i += serverNamLength;
-            servers.add(new ServerEntry(
-                    address, port, clientCount, serverName));
-            ++serversRead;
-            if(serversRead == stream[4])
-                break;
-        }*/
 
         return servers;
     }

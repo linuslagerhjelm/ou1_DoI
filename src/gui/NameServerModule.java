@@ -67,27 +67,7 @@ public class NameServerModule {
             setStrings.add(se.toStringArray());
         }
         notifyListeners(setStrings);
-        /*System.err.println(
-                "Request for server list from " + nameServerAddress + ":" +
-                nameServerPort);
-        // This is an example of a server list with
-        // IP, port, topic, no of clients
-        notifyListeners(
-                Arrays.<String[]>asList(
-                        new String[]{
-                                "1.2.3.4", "1234", "Mat och pasta", "5"
-                        },
-                        new String[]{
-                                "1.2.3.4", "1234", "Mat och pasta", "5"
-                        },
-                        new String[]{
-                                "1.2.3.4", "1234", "Mat och pasta", "5"
-                        },
-                        new String[]{
-                                "1.2.3.4", "1234", "Mat och pasta", "5"
-                        }
-                )
-        );*/
+
     }
 
     /**
