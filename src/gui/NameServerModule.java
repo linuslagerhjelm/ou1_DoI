@@ -28,16 +28,17 @@ public class NameServerModule {
     public void getServerList(String nameServerAddress, int nameServerPort) {
         // TODO actually request the list
         try{
+
             DatagramSocket socket = new DatagramSocket();
-            socket.setSoTimeout(8000);
+            socket.setSoTimeout(1000);
             InetAddress address = InetAddress.getByName(nameServerAddress);
             byte[] getListPDU = new GetListPDU().toByteArray();
             DatagramPacket getListPacket = new DatagramPacket(getListPDU, getListPDU.length, address, nameServerPort);
+
             servers = new ArrayList<>();
             seqNo = new ArrayList<>();
 
             socket.send(getListPacket);
-
             try{
                 boolean running = true;
                 while(running){
@@ -54,6 +55,8 @@ public class NameServerModule {
                     } else{
                         running = false;
                     }
+                    if(pdu.toByteArray().length < 65507)
+                        running = false;
 
                 }
             } catch (SocketTimeoutException e) { getServerList(nameServerAddress, nameServerPort); }

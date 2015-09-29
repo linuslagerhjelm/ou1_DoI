@@ -4,6 +4,8 @@ import pdu.ByteSequenceBuilder;
 import pdu.OpCode;
 import pdu.PDU;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -15,8 +17,8 @@ public class SListPDU extends PDU {
     Set<ServerEntry> entries;
 
     public SListPDU(byte[] inStream){
-        byte seqNo = inStream[1];
-        SListPDU.ServerEntry[] servers = getServerEntries(inStream);
+        this.seqNo = inStream[1];
+        this.entries = priv_getServerEntries(inStream);
     }
 
     public SListPDU(byte seqNo, ServerEntry... entries) {
@@ -76,11 +78,41 @@ public class SListPDU extends PDU {
         }
     }
 
-    private ServerEntry[] getServerEntries(byte[] stream){
-        List<ServerEntry> servers = new ArrayList<>();
-        int serversRead = 0;
+    private Set<ServerEntry> priv_getServerEntries(byte[] stream){
+        Set<ServerEntry> servers = new HashSet<>();
+        int position = 4;
 
-        for(int i = 4; i < stream.length; ++i){
+        InputStream inputStream = new ByteArrayInputStream(stream);
+
+        try {
+            readExactly(inputStream, 4);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        for(int i = 0; i < stream[3]; ++i){
+            InetAddress address = null;
+            short port;
+            byte clientCount;
+            String serverName;
+
+            try {
+                address = InetAddress.getByAddress(readExactly(inputStream, 4));
+                port = (short) byteArrayToShort(readExactly(inputStream, 2));
+                clientCount = readExactly(inputStream, 1)[0];
+
+                Byte b = new Byte(readExactly(inputStream, 1)[0]);
+                int serverNameLength = b.intValue();
+
+                serverName = readExactly(inputStream, serverNameLength).toString();
+                servers.add(new ServerEntry(address, port, clientCount, serverName));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
+
+        /*for(int i = 4; i < stream.length; ++i){
             InetAddress address = null;
             short port;
             byte clientCount;
@@ -99,8 +131,7 @@ public class SListPDU extends PDU {
             ++i;
             int serverNamLength = stream[i];
             ++i;
-            serverName = new String(Arrays.copyOfRange(
-                    stream, i, i+serverNamLength), Charset.forName("utf-8"));
+            serverName = new String(Arrays.copyOfRange(stream, i, i+serverNamLength), Charset.forName("utf-8"));
 
             i += serverNamLength;
             servers.add(new ServerEntry(
@@ -108,14 +139,8 @@ public class SListPDU extends PDU {
             ++serversRead;
             if(serversRead == stream[4])
                 break;
-        }
+        }*/
 
-        ServerEntry[] returnArray = new ServerEntry[servers.size()];
-
-        for(int i = 0; i < servers.size(); ++i){
-            returnArray[i] = servers.get(i);
-        }
-
-        return returnArray;
+        return servers;
     }
 }
