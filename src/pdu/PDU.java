@@ -175,7 +175,7 @@ public abstract class PDU {
     }
     /**
      * Converts a 4 byte array of unsigned bytes to an long
-     * @param b an array of 4 unsigned bytes
+     * @param in an array of 4 unsigned bytes
      * @return a long representing the unsigned int
      */
     public static long unsignedIntToLong(byte[] in)

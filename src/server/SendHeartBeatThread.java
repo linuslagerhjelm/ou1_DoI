@@ -1,53 +1,70 @@
 package server;
 
-import pdu.pduTypes.AlivePDU;
 
-import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketException;
+import pdu.pduTypes.AlivePDU;
+import pdu.pduTypes.RegPDU;
+
+import java.net.*;
 
 /**
  * Created by linuslagerhjelm on 15-09-28.
  */
 public class SendHeartBeatThread implements Runnable{
-    InetAddress address;
-    int port;
-    ChatServer chatServer;
+    private int chatServerPort;
+    private ChatServer chatServer;
+    private InetAddress nameServerAddress;
+    private int nameServerPort = 1337;
+    byte[] buffer = new byte[65536];
 
-    public SendHeartBeatThread(InetAddress address, int port, ChatServer cs){
-        this.address = address;
-        this.port = port;
+    public SendHeartBeatThread(ChatServer cs){
+        this.chatServerPort = cs.getPort();
         this.chatServer = cs;
+        try {
+            nameServerAddress = InetAddress.getByName("itchy.cs.umu.se");
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void run() {
-        DatagramSocket datagramSocket = null;
         try {
-            datagramSocket = new DatagramSocket();
-            sendPackage(datagramSocket);
-        } catch (SocketException ignore) { }
+            DatagramSocket datagramSocket = new DatagramSocket();
+            datagramSocket.setSoTimeout(10000);
+            sendRegPdu(datagramSocket);
+            while (true){
+                DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+                try{
+                    datagramSocket.receive(packet);
+                } catch(SocketTimeoutException e){
+                    sendRegPdu(datagramSocket);
+                }
+                byte[] packetByte = packet.getData();
+                if(packetByte[0] == 1)
+                    sendHeartBeat(datagramSocket);
+                else if(packetByte[0] == 100)
+                    sendRegPdu(datagramSocket);
 
-        while (true) {
-            try {
                 Thread.sleep(8000);
-                sendPackage(datagramSocket);
-            } catch (InterruptedException e) { }
+            }
 
+        } catch (Exception ignore) {
+            ignore.printStackTrace();
         }
+
     }
 
-    private void sendPackage(DatagramSocket dgs) {
-        byte clientCount = (byte)chatServer.nrOfConnectedClients();
-        short id = chatServer.getId();
-        byte[] pdu =  new AlivePDU(clientCount, id).toByteArray();
-        DatagramPacket p = new DatagramPacket(pdu, pdu.length, address, port);
-        try {
-            dgs.send(p);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    private void sendRegPdu(DatagramSocket socket) throws Exception{
+        byte[] pdu = new RegPDU(chatServer.getServerName(), (short)chatServerPort).toByteArray();
+        DatagramPacket UDPpacket = new DatagramPacket(pdu, pdu.length,nameServerAddress, nameServerPort);
+
+        socket.send(UDPpacket);
+    }
+
+    private void sendHeartBeat(DatagramSocket socket) throws Exception{
+        byte[] pdu = new AlivePDU((byte)chatServer.getClientCount(), chatServer.getId()).toByteArray();
+        DatagramPacket UDPpacket = new DatagramPacket(pdu, pdu.length,nameServerAddress, nameServerPort);
+
+        socket.send(UDPpacket);
     }
 }

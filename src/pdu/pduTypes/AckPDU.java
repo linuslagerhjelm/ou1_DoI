@@ -28,11 +28,7 @@ public class AckPDU extends PDU {
 
         outputByteStream.append(OpCode.ACK.value);
         outputByteStream.append(new byte[1]);
-
-        if(this.id < 256)
-            outputByteStream.append(new byte[1]);
-
-        outputByteStream.append((byte) this.id);
+        outputByteStream.appendShort((short) id);
 
         return outputByteStream.toByteArray();
     }
