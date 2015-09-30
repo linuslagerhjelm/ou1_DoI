@@ -1,6 +1,19 @@
 package gui;
 
+import pdu.PDU;
+import pdu.pduTypes.JoinPDU;
+import pdu.pduTypes.MessagePDU;
+import pdu.pduTypes.SListPDU;
+import pdu.pduTypes.ULeavePDU;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -13,6 +26,8 @@ public class ChatModule {
     private final List<Listener<String>> joinListeners = new ArrayList<>();
     private final List<Listener<String>> leaveListeners = new ArrayList<>();
     private final List<Listener<String>> messageListeners = new ArrayList<>();
+    private Socket socket;
+    private String nickname;
 
     /**
      * Creates a new chat module and attempts to join the server at the
@@ -23,10 +38,21 @@ public class ChatModule {
      * @param nickname The desired nickname.
      */
     public ChatModule(String address, int port, String nickname) {
+        this.nickname = nickname;
+        try {
+            this.socket = new Socket(InetAddress.getByName(address),port);
+            PDU pdu = new JoinPDU(nickname);
+            OutputStream outputStream = socket.getOutputStream();
+            outputStream.write(pdu.toByteArray());
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         // TODO replace with other stuff, threads for example
-        System.err.println(
+        /*System.err.println(
                 "Attempting to join server at " + address + ":" + port +
-                " with nickname \"" + nickname + "\"");
+                " with nickname \"" + nickname + "\"");*/
     }
 
     /**
@@ -36,7 +62,15 @@ public class ChatModule {
      */
     public void sendMessage(String message) {
         // TODO actually send the message
-        System.err.println("Sending message: \"" + message + "\"");
+        PDU pdu = new MessagePDU(message);
+        try {
+            OutputStream dataOut = socket.getOutputStream();
+            dataOut.write(pdu.toByteArray());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        //System.err.println("Sending message: \"" + message + "\"");
     }
 
     /**
@@ -54,7 +88,13 @@ public class ChatModule {
      */
     public void leave() {
         // TODO and here
-        System.err.println("Leaving chat");
+        PDU pdu = new ULeavePDU(this.nickname, new Date());
+        try {
+            OutputStream dataOut = socket.getOutputStream();
+            dataOut.write(pdu.toByteArray());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**

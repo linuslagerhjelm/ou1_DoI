@@ -43,6 +43,8 @@ public class SListPDU extends PDU {
         return outputByteStream.toByteArray();
     }
     public Set<ServerEntry> getServerEntries(){ return entries; }
+
+
     public static class ServerEntry {
 
         public final String serverName;
@@ -109,7 +111,6 @@ public class SListPDU extends PDU {
             }
 
         }
-
 
         return servers;
     }
