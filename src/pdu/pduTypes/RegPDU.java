@@ -13,14 +13,14 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class RegPDU extends PDU {
 
     private short TCPPort;
-    private byte[] serverName;
+    private String serverName;
 
     public RegPDU(InputStream inStream){
 
         try {
-            int serverNameLength = byteArrayToShort(readExactly(inStream, 1));
-            this.TCPPort = bytesToShort(readExactly(inStream,2));
-            this.serverName = readExactly(inStream, serverNameLength);
+            int snLength = (short)byteArrayToLong(readExactly(inStream, 1));
+            this.TCPPort = (short)byteArrayToLong(readExactly(inStream,2));
+            serverName = new String(readExactly(inStream, snLength), "UTF-8");
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -28,7 +28,7 @@ public class RegPDU extends PDU {
     }
 
     public RegPDU(String serverName, short port) {
-        this.serverName = serverName.getBytes(UTF_8);
+        this.serverName = serverName;
         this.TCPPort = port;
     }
 
@@ -36,10 +36,10 @@ public class RegPDU extends PDU {
     public byte[] toByteArray() {
         ByteSequenceBuilder outputByteStream = new ByteSequenceBuilder();
         outputByteStream.append(OpCode.REG.value);
-        outputByteStream.append((byte) serverName.length);
+        outputByteStream.append((byte) serverName.getBytes(UTF_8).length);
 
         outputByteStream.appendShort(TCPPort);
-        outputByteStream.append(serverName);
+        outputByteStream.append(serverName.getBytes(UTF_8));
         outputByteStream.pad();
 
         return outputByteStream.toByteArray();

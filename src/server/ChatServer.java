@@ -10,7 +10,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class ChatServer {
 
-    CopyOnWriteArrayList<ClientThread> connectedClient = new CopyOnWriteArrayList<>();
+    CopyOnWriteArrayList<Thread> connectedClient = new CopyOnWriteArrayList<>();
     private short id;
     int port;
     String serverName;
@@ -37,15 +37,16 @@ public class ChatServer {
         System.out.println("finnish");
     }
 
-    public void registerNewClient(ClientThread ct) {
+    public void registerNewClient(Thread ct) {
         connectedClient.add(ct);
     }
 
     public Set<String> getNicknames() {
         Set<String> nicks = new HashSet<>();
-        for(ClientThread ct: connectedClient){
+        //TODO: fix this
+        /*for(Thread ct: connectedClient){
             nicks.add(ct.getNickname());
-        }
+        }*/
         System.out.println(nicks.toString());
         return nicks;
     }

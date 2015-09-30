@@ -6,7 +6,6 @@ import pdu.PDU;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
 
 public class AlivePDU extends PDU {
     private short id;
@@ -14,8 +13,8 @@ public class AlivePDU extends PDU {
 
     public AlivePDU(InputStream inStream){
         try {
-            this.clientCount = readExactly(inStream, 1)[0];
-            this.id = bytesToShort(readExactly(inStream, 2));
+            this.clientCount = (byte) byteArrayToLong(readExactly(inStream, 1));
+            this.id = (short) byteArrayToLong(readExactly(inStream, 2));
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -33,11 +32,7 @@ public class AlivePDU extends PDU {
 
         outputByteStream.append(OpCode.ALIVE.value);
         outputByteStream.append(clientCount);
-
-        if(this.id < 256)
-            outputByteStream.append(new byte[1]);
-
-        outputByteStream.append((byte) this.id);
+        outputByteStream.appendShort(this.id);
 
         return outputByteStream.toByteArray();
     }

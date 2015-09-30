@@ -20,8 +20,8 @@ public class UJoinPDU extends PDU {
         try {
             int nickLength = Byte.valueOf(readExactly(inStream, 1)[0]);
             readExactly(inStream, 2);
-            this.timestamp = new Date(byteArrayToLong(readExactly(inStream, 4)));
-            this.nickname = new String(readExactly(inStream, nickLength), "UTF-8");
+            timestamp = new Date(byteArrayToLong(readExactly(inStream, 4))*1000);
+            nickname = new String(readExactly(inStream, nickLength), "UTF-8");
 
         } catch (IOException e) {
             e.printStackTrace();

@@ -16,8 +16,9 @@ public class JoinPDU extends PDU {
 
     public JoinPDU(InputStream inStream){
         try {
-            int nickLength = Byte.valueOf(readExactly(inStream,1)[0]);
-            this.nickname = new String(readExactly(inStream, nickLength), "UTF-8");
+            int nickLength = (int)byteArrayToLong(readExactly(inStream,1));
+            readExactly(inStream, 2);
+            nickname = new String(readExactly(inStream, nickLength), "UTF-8");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -29,16 +30,18 @@ public class JoinPDU extends PDU {
 
     @Override
     public byte[] toByteArray() {
-
-        byte[] nicknameBytes = nickname.getBytes(UTF_8);
         ByteSequenceBuilder outputByteStream = new ByteSequenceBuilder();
 
         outputByteStream.append(OpCode.JOIN.value);
-        outputByteStream.append((byte)nicknameBytes.length);
+        outputByteStream.append((byte)nickname.getBytes(UTF_8).length);
         outputByteStream.pad();
-        outputByteStream.append(nicknameBytes);
+        outputByteStream.append(nickname.getBytes(UTF_8));
         outputByteStream.pad();
 
         return outputByteStream.toByteArray();
+    }
+
+    public String getNickname(){
+        return this.nickname;
     }
 }

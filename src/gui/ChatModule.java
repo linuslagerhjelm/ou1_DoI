@@ -39,7 +39,6 @@ public class ChatModule {
             outputStream.write(pdu.toByteArray());
 
             PDU nicksPDU = PDU.fromInputStream(socket.getInputStream());
-            //PDU nicksPDU = PDU.fromInputStream(socket.getInputStream());
 
             if(nicksPDU.toByteArray()[0] == 19){
                 Set<String> nicknames = ((NicksPDU)nicksPDU).getNicknames();

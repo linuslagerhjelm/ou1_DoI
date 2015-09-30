@@ -5,6 +5,7 @@ import pdu.PDU;
 import pdu.pduTypes.GetListPDU;
 import pdu.pduTypes.SListPDU;
 
+import java.io.ByteArrayInputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -30,7 +31,7 @@ public class NameServerModule {
      * @param nameServerPort the port where the name server accepts connections
      */
     public void getServerList(String nameServerAddress, int nameServerPort) {
-        /*try{
+        try{
 
             DatagramSocket socket = new DatagramSocket();
             socket.setSoTimeout(1000);
@@ -51,9 +52,10 @@ public class NameServerModule {
                     DatagramPacket recievePacket = new DatagramPacket(buffer, buffer.length);
                     socket.receive(recievePacket);
 
-                    SListPDU pdu = new SListPDU(recievePacket.);
+                    SListPDU pdu = new SListPDU(new ByteArrayInputStream(recievePacket.getData()));
+
                     if( !seqNo.contains(new Integer(PDU.byteArrayToInt(getListPDU)) )){
-                        Set<SListPDU.ServerEntry> temp = pdu.getServerEntries();
+                        List<SListPDU.ServerEntry> temp = pdu.getServerEntries();
                         for(SListPDU.ServerEntry se: temp){
                             servers.add(se);
                         }
@@ -72,8 +74,7 @@ public class NameServerModule {
         for(SListPDU.ServerEntry se: servers){
             setStrings.add(se.toStringArray());
         }
-        notifyListeners(setStrings);*/
-
+        notifyListeners(setStrings);
     }
 
     /**

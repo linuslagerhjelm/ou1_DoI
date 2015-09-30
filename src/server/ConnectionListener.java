@@ -23,7 +23,7 @@ public class ConnectionListener implements Runnable {
             ServerSocket serverSocket = new ServerSocket(server.getPort());
             Socket socket = serverSocket.accept();
             if(socket.isConnected()){
-                new ClientThread(socket, server);
+                server.registerNewClient(new Thread(new ClientThread(socket, server)));
             }
 
         } catch (IOException e) {

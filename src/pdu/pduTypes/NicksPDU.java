@@ -18,8 +18,8 @@ public class NicksPDU extends PDU {
     public NicksPDU(InputStream inStream){
         try {
             readExactly(inStream,1);
-            int totalLength = byteArrayToShort(readExactly(inStream, 2));
-            this.nicknames = getNicknamesFromByteArray(readExactly(inStream,totalLength));
+            int totalLength = (int) byteArrayToLong(readExactly(inStream, 2));
+            nicknames = nicknamesFromByteArray(readExactly(inStream, totalLength));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -49,7 +49,7 @@ public class NicksPDU extends PDU {
         outputByteStream.append(OpCode.NICKS.value);
         outputByteStream.append((byte)this.nicknames.size());
 
-        outputByteStream.appendShort((short)nickBytes.length);
+        outputByteStream.appendShort((short) nickBytes.length);
         outputByteStream.append(nickBytes);
         outputByteStream.pad();
 
@@ -60,14 +60,16 @@ public class NicksPDU extends PDU {
         return this.nicknames;
     }
 
-    private static Set<String> getNicknamesFromByteArray(byte[] stream){
+    private static Set<String> nicknamesFromByteArray(byte[] stream){
         Set<String> returnSet = new HashSet<>();
         ByteSequenceBuilder temp = new ByteSequenceBuilder();
 
         for(int i = 0; i < stream.length; ++i){
-            temp.append(stream[i]);
+            if(stream[i] != '\0'){
+                temp.append(stream[i]);
+            }
 
-            if(stream[i] == '\0'){
+            else{
                 String myString = null;
                 try {
                     myString = new String(temp.toByteArray(), "UTF-8");
@@ -76,7 +78,6 @@ public class NicksPDU extends PDU {
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
                 }
-                ++i;
             }
         }
         return returnSet;

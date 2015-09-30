@@ -1,22 +1,20 @@
 package pdu.pduTypes;
 
+import org.testng.collections.Lists;
 import pdu.ByteSequenceBuilder;
 import pdu.OpCode;
 import pdu.PDU;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.nio.charset.Charset;
 import java.util.*;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class SListPDU extends PDU {
     byte seqNo;
-    Set<ServerEntry> entries;
+    List<ServerEntry> entries = new LinkedList<>();
 
     public SListPDU(InputStream inStream){
         try {
@@ -30,7 +28,10 @@ public class SListPDU extends PDU {
 
     public SListPDU(byte seqNo, ServerEntry... entries) {
         this.seqNo = seqNo;
-        this.entries = new HashSet<>(Arrays.asList(entries));
+
+        for(ServerEntry s: entries){
+            this.entries.add(s);
+        }
     }
 
     @Override
@@ -38,15 +39,15 @@ public class SListPDU extends PDU {
         ByteSequenceBuilder outputByteStream = new ByteSequenceBuilder();
         outputByteStream.append(OpCode.SLIST.value);
         outputByteStream.append(seqNo);
+        outputByteStream.appendShort((short) entries.size());
 
-        outputByteStream.appendShort((short)entries.size());
         for(ServerEntry server: entries) {
             outputByteStream.append(server.toByteArray());
         }
 
         return outputByteStream.toByteArray();
     }
-    public Set<ServerEntry> getServerEntries(){ return entries; }
+    public List<ServerEntry> getServerEntries(){ return entries; }
 
 
     public static class ServerEntry {
@@ -84,12 +85,12 @@ public class SListPDU extends PDU {
         }
     }
 
-    private Set<ServerEntry> priv_getServerEntries(InputStream inputStream){
-        Set<ServerEntry> servers = new HashSet<>();
+    private List<ServerEntry> priv_getServerEntries(InputStream inputStream){
+        List<ServerEntry> servers = new LinkedList<>();
 
-        long nrOfServers = 0;
+        int nrOfServers = 0;
         try {
-            nrOfServers = byteArrayToLong(readExactly(inputStream, 2));
+            nrOfServers = (int)byteArrayToLong(readExactly(inputStream, 2));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -97,26 +98,25 @@ public class SListPDU extends PDU {
         for(int i = 0; i < nrOfServers; ++i){
             InetAddress address = null;
             short port;
-            long clientCount;
+            byte cCount;
             String serverName;
 
             try {
                 address = InetAddress.getByAddress(readExactly(inputStream, 4));
                 port = (short)byteArrayToLong(readExactly(inputStream, 2));
-                clientCount = byteArrayToLong(readExactly(inputStream, 1));
+                cCount = (byte)byteArrayToLong(readExactly(inputStream, 1));
 
                 Byte b = (readExactly(inputStream, 1)[0]);
                 int serverNameLength = b.intValue();
 
                 serverName = new String(readExactly(inputStream, serverNameLength), "UTF-8");
-                servers.add(new ServerEntry(address, port, (byte)clientCount, serverName));
+                servers.add(new ServerEntry(address, port, cCount, serverName));
                 readExactly(inputStream,padLengths(serverNameLength)-serverNameLength);
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
         }
-
         return servers;
     }
 }

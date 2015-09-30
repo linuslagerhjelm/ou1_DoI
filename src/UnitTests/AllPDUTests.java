@@ -21,13 +21,13 @@ import static org.junit.Assert.assertEquals;
 @SuppressWarnings("OverlyCoupledClass")
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-        /*AckPDUTest.class,
+        AckPDUTest.class,
         AlivePDUTest.class,
         ChNickPDUTest.class,
         GetListPDUTest.class,
         NotRegPDUTest.class,
         QuitPDUTest.class,
-        RegPDUTest.class,*/
+        RegPDUTest.class,
         UCHNickPDUTest.class,
         JoinPDUTest.class,
         MessagePDUTest.class,

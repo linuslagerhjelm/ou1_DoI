@@ -35,12 +35,11 @@ public abstract class PDU {
      */
     public static PDU fromInputStream(InputStream inStream) throws IOException {
 
-        //byte[] inputBytes = inStreamToByteArray(inStream);
-        //inputStream = inStream;
+        int pduChooser = (int)byteArrayToLong(readExactly(inStream,1));
 
-        switch(readExactly(inStream,1)[0]){
+        switch(pduChooser){
             case 0:
-                return new  RegPDU(inStream);
+                return new RegPDU(inStream);
             case 1:
                 return new AckPDU(inStream);
             case 2:
