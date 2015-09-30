@@ -5,6 +5,8 @@ import pdu.ByteSequenceBuilder;
 import pdu.OpCode;
 import pdu.PDU;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Date;
@@ -15,13 +17,16 @@ public class ULeavePDU extends PDU {
     private String nickname;
     private Date timestamp;
 
-    public ULeavePDU(byte[] inStream){
-        int nickLength = (inStream[1] & 0xFF) << 8;
-        long unixTime = unsignedIntToLong(Arrays.copyOfRange(inStream, 8, 12));
-        this.timestamp = new Date(unixTime);
+    public ULeavePDU(InputStream inStream){
+        try {
+            int nickLength = Byte.valueOf(readExactly(inStream, 1)[0]);
+            readExactly(inStream, 2);
+            this.timestamp = new Date(byteArrayToLong(readExactly(inStream, 4)));
+            this.nickname = new String(readExactly(inStream, nickLength), "UTF-8");
 
-        nickname = Arrays.copyOfRange(
-                inStream,inStream.length-nickLength,inStream.length).toString();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public ULeavePDU(String nickname, Date timestamp) {

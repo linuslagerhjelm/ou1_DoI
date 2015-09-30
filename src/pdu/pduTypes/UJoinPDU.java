@@ -5,6 +5,8 @@ import pdu.ByteSequenceBuilder;
 import pdu.OpCode;
 import pdu.PDU;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Date;
@@ -14,17 +16,21 @@ public class UJoinPDU extends PDU {
     private String nickname;
     private Date timestamp;
 
-    public UJoinPDU(byte[] inStream){
-        byte[] timestamp = Arrays.copyOfRange(inStream, 4, 8);
-        this.timestamp = new Date(unsignedIntToLong(timestamp));
+    public UJoinPDU(InputStream inStream){
+        try {
+            int nickLength = Byte.valueOf(readExactly(inStream, 1)[0]);
+            readExactly(inStream, 2);
+            this.timestamp = new Date(byteArrayToLong(readExactly(inStream, 4)));
+            this.nickname = new String(readExactly(inStream, nickLength), "UTF-8");
 
-        byte[] nickBytes = Arrays.copyOfRange(inStream, 8, inStream.length);
-        this.nickname = nickBytes.toString();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public UJoinPDU(String nickname, Date timestamp) {
         this.nickname = nickname;
-        this.timestamp = timestamp;
+        this.timestamp = new Date((timestamp.getTime()/1000)*1000);
     }
 
     @Override

@@ -1,6 +1,8 @@
 package server;
 
 
+import pdu.ByteSequenceBuilder;
+import pdu.PDU;
 import pdu.pduTypes.AlivePDU;
 import pdu.pduTypes.RegPDU;
 
@@ -40,8 +42,13 @@ public class SendHeartBeatThread implements Runnable{
                     sendRegPdu(datagramSocket);
                 }
                 byte[] packetByte = packet.getData();
-                if(packetByte[0] == 1)
+                if(packetByte[0] == 1){
                     sendHeartBeat(datagramSocket);
+                    byte[] IDByte = new byte[2];
+                    IDByte[0] = packetByte[2];
+                    IDByte[1] = packetByte[3];
+                    chatServer.setId((short)PDU.byteArrayToShort(IDByte));
+                }
                 else if(packetByte[0] == 100)
                     sendRegPdu(datagramSocket);
 
@@ -51,7 +58,6 @@ public class SendHeartBeatThread implements Runnable{
         } catch (Exception ignore) {
             ignore.printStackTrace();
         }
-
     }
 
     private void sendRegPdu(DatagramSocket socket) throws Exception{

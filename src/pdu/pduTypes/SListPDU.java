@@ -12,13 +12,20 @@ import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.util.*;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 public class SListPDU extends PDU {
     byte seqNo;
     Set<ServerEntry> entries;
 
-    public SListPDU(byte[] inStream){
-        this.seqNo = inStream[1];
-        this.entries = priv_getServerEntries(inStream);
+    public SListPDU(InputStream inStream){
+        try {
+            this.seqNo = (byte)byteArrayToLong(readExactly(inStream, 1));
+            this.entries = priv_getServerEntries(inStream);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public SListPDU(byte seqNo, ServerEntry... entries) {
@@ -32,10 +39,7 @@ public class SListPDU extends PDU {
         outputByteStream.append(OpCode.SLIST.value);
         outputByteStream.append(seqNo);
 
-        if(entries.size() < 256)
-            outputByteStream.append(new byte[1]);
-
-        outputByteStream.append((byte)entries.size());
+        outputByteStream.appendShort((short)entries.size());
         for(ServerEntry server: entries) {
             outputByteStream.append(server.toByteArray());
         }
@@ -67,10 +71,10 @@ public class SListPDU extends PDU {
             ByteSequenceBuilder byteArray = new ByteSequenceBuilder();
 
             byteArray.append(address.getAddress());
-            byteArray.append((byte)port);
+            byteArray.appendShort(port);
             byteArray.append(clientCount);
-            byteArray.append((byte)serverName.getBytes().length);
-            byteArray.append(serverName.getBytes());
+            byteArray.append((byte)serverName.getBytes(UTF_8).length);
+            byteArray.append(serverName.getBytes(UTF_8));
             byteArray.pad();
 
             return byteArray.toByteArray();
@@ -80,33 +84,34 @@ public class SListPDU extends PDU {
         }
     }
 
-    private Set<ServerEntry> priv_getServerEntries(byte[] stream){
+    private Set<ServerEntry> priv_getServerEntries(InputStream inputStream){
         Set<ServerEntry> servers = new HashSet<>();
-        InputStream inputStream = new ByteArrayInputStream(stream);
 
+        long nrOfServers = 0;
         try {
-            readExactly(inputStream, 4);
+            nrOfServers = byteArrayToLong(readExactly(inputStream, 2));
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        for(int i = 0; i < stream[3]; ++i){
+        for(int i = 0; i < nrOfServers; ++i){
             InetAddress address = null;
             short port;
-            byte clientCount;
+            long clientCount;
             String serverName;
 
             try {
                 address = InetAddress.getByAddress(readExactly(inputStream, 4));
-                port = (short) byteArrayToShort(readExactly(inputStream, 2));
-                clientCount = readExactly(inputStream, 1)[0];
+                port = (short)byteArrayToLong(readExactly(inputStream, 2));
+                clientCount = byteArrayToLong(readExactly(inputStream, 1));
 
-                Byte b = new Byte(readExactly(inputStream, 1)[0]);
+                Byte b = (readExactly(inputStream, 1)[0]);
                 int serverNameLength = b.intValue();
 
                 serverName = new String(readExactly(inputStream, serverNameLength), "UTF-8");
-                servers.add(new ServerEntry(address, port, clientCount, serverName));
-            } catch (IOException e) {
+                servers.add(new ServerEntry(address, port, (byte)clientCount, serverName));
+                readExactly(inputStream,padLengths(serverNameLength)-serverNameLength);
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 

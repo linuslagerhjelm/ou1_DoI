@@ -4,18 +4,22 @@ import pdu.ByteSequenceBuilder;
 import pdu.OpCode;
 import pdu.PDU;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 
 public class AlivePDU extends PDU {
     private short id;
     private byte clientCount;
 
-    public AlivePDU(byte[] inStream){
-        this.clientCount = inStream[1];
-        if(inStream[2] == 0)
-            this.id = (short)inStream[3];
-        else
-            this.id =(byte)PDU.byteArrayToInt(Arrays.copyOfRange(inStream,2,4));
+    public AlivePDU(InputStream inStream){
+        try {
+            this.clientCount = readExactly(inStream, 1)[0];
+            this.id = bytesToShort(readExactly(inStream, 2));
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public AlivePDU(byte clientCount, short id) {

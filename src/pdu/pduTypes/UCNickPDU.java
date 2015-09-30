@@ -5,6 +5,8 @@ import pdu.ByteSequenceBuilder;
 import pdu.OpCode;
 import pdu.PDU;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Date;
@@ -13,50 +15,45 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class UCNickPDU extends PDU {
     Date timestamp;
-    byte[] oldNick;
-    byte[] newNick;
+    String oldNick;
+    String newNick;
 
-    public UCNickPDU(byte[] inStream){
-        int oldNickLength = inStream[1];
-        int newNickLength = inStream[2];
-        byte[] timestamp = Arrays.copyOfRange(inStream, 4, 8);
-        this.timestamp = new Date(unsignedIntToLong(timestamp));
-        oldNick = Arrays.copyOfRange(inStream, 8, 8+oldNickLength);
-        newNick = Arrays.copyOfRange(
-                inStream, 8+oldNickLength, (8+oldNickLength+newNickLength));
+    public UCNickPDU(InputStream inStream){
 
+
+        try {
+            int oldNickLength = Byte.valueOf(readExactly(inStream, 1)[0]);
+            int newNickLength = Byte.valueOf(readExactly(inStream, 1)[0]);
+            readExactly(inStream, 1);
+            this.timestamp = new Date(byteArrayToLong(readExactly(inStream, 4))*1000);
+            this.oldNick = new String(readExactly(inStream, oldNickLength), "UTF-8");
+            readExactly(inStream, padLengths(oldNickLength)-oldNickLength);
+            this.newNick = new String(readExactly(inStream, newNickLength), "UTF-8");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public UCNickPDU(Date timestamp, String oldNick, String newNick) {
-        this.timestamp = timestamp;
-        this.oldNick = oldNick.getBytes(UTF_8);
-        this.newNick = newNick.getBytes(UTF_8);
+        this.timestamp = new Date((timestamp.getTime()/1000)*1000);
+        this.oldNick = oldNick;
+        this.newNick = newNick;
     }
 
     @Override
     public byte[] toByteArray() {
         ByteSequenceBuilder outputByteStream = new ByteSequenceBuilder();
         outputByteStream.append(OpCode.UCNICK.value);
-        outputByteStream.append((byte)oldNick.length);
-        outputByteStream.append((byte)newNick.length);
+        outputByteStream.append((byte)oldNick.getBytes(UTF_8).length);
+        outputByteStream.append((byte)newNick.getBytes(UTF_8).length);
         outputByteStream.pad();
-        outputByteStream.append(getTimestampFromDate(timestamp));
-        outputByteStream.append(oldNick);
+        outputByteStream.appendInt((int)(timestamp.getTime()/1000));
+        outputByteStream.append(oldNick.getBytes(UTF_8));
         outputByteStream.pad();
-        outputByteStream.append(newNick);
+        outputByteStream.append(newNick.getBytes(UTF_8));
         outputByteStream.pad();
 
         return outputByteStream.toByteArray();
-    }
-
-    private byte[] getTimestampFromDate(Date date){
-        if(null == date){
-            throw new NullPointerException();
-        }
-
-        int dateInSec = (int) (date.getTime() / 1000);
-        byte[] bytes = ByteBuffer.allocate(4).putInt(dateInSec).array();
-
-        return bytes;
     }
 }

@@ -1,20 +1,13 @@
 package gui;
 
 import pdu.PDU;
-import pdu.pduTypes.JoinPDU;
-import pdu.pduTypes.MessagePDU;
-import pdu.pduTypes.SListPDU;
-import pdu.pduTypes.ULeavePDU;
+import pdu.pduTypes.*;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Model for chat module in clients.
@@ -44,6 +37,16 @@ public class ChatModule {
             PDU pdu = new JoinPDU(nickname);
             OutputStream outputStream = socket.getOutputStream();
             outputStream.write(pdu.toByteArray());
+
+            PDU nicksPDU = PDU.fromInputStream(socket.getInputStream());
+            //PDU nicksPDU = PDU.fromInputStream(socket.getInputStream());
+
+            if(nicksPDU.toByteArray()[0] == 19){
+                Set<String> nicknames = ((NicksPDU)nicksPDU).getNicknames();
+                for(String s: nicknames){
+                    notifyMessageListeners(s);
+                }
+            }
 
         } catch (IOException e) {
             e.printStackTrace();

@@ -2,8 +2,7 @@ package server;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -12,7 +11,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class ChatServer {
 
     CopyOnWriteArrayList<ClientThread> connectedClient = new CopyOnWriteArrayList<>();
-    private int clientCount;
     private short id;
     int port;
     String serverName;
@@ -20,7 +18,6 @@ public class ChatServer {
 
     public ChatServer(String args[]) throws IOException, InterruptedException {
 
-        clientCount = 0;
         address = InetAddress.getByName(args[0]);
         serverName = args[1];
         port = Integer.parseInt(args[2]);
@@ -42,16 +39,23 @@ public class ChatServer {
 
     public void registerNewClient(ClientThread ct) {
         connectedClient.add(ct);
-        ++this.clientCount;
-        System.out.println("Something happened");
     }
 
-    public int nrOfConnectedClients(){ return clientCount; }
+    public Set<String> getNicknames() {
+        Set<String> nicks = new HashSet<>();
+        for(ClientThread ct: connectedClient){
+            nicks.add(ct.getNickname());
+        }
+        System.out.println(nicks.toString());
+        return nicks;
+    }
+
+    public void setId(short s) { this.id = s; }
     public short getId(){ return id; }
     public String getServerName() { return serverName; }
     public InetAddress getInetAddress() { return address; }
     public int getPort() { return port; }
-    public int getClientCount() { return clientCount; }
+    public int getClientCount() { return connectedClient.size(); }
 
     public static void main(String[] args) {
         try {

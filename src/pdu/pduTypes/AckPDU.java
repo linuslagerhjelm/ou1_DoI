@@ -5,17 +5,22 @@ import pdu.ByteSequenceBuilder;
 import pdu.OpCode;
 import pdu.PDU;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 
 public class AckPDU extends PDU {
 
     private int id;
 
-    public AckPDU(byte[] inStream){
-        ByteSequenceBuilder temp = new ByteSequenceBuilder();
-        temp.append(Arrays.copyOfRange(inStream, 3, inStream.length));
-        temp.pad();
-        this.id = byteArrayToInt(temp.toByteArray());
+    public AckPDU(InputStream inStream){
+        try {
+            readExactly(inStream, 1);
+            this.id = byteArrayToShort(readExactly(inStream, 2));
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public AckPDU(short id) {

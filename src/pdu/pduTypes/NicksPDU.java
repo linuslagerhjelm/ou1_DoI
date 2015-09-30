@@ -4,6 +4,9 @@ import pdu.ByteSequenceBuilder;
 import pdu.OpCode;
 import pdu.PDU;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -12,8 +15,14 @@ public class NicksPDU extends PDU {
 
     private Set<String> nicknames = new HashSet<>();
 
-    public NicksPDU(byte[] inStream){
-        this.nicknames = getNicknamesFromByteArray(inStream);
+    public NicksPDU(InputStream inStream){
+        try {
+            readExactly(inStream,1);
+            int totalLength = byteArrayToShort(readExactly(inStream, 2));
+            this.nicknames = getNicknamesFromByteArray(readExactly(inStream,totalLength));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public NicksPDU(Collection<String> nicknames) {
@@ -26,13 +35,13 @@ public class NicksPDU extends PDU {
 
     @Override
     public byte[] toByteArray() {
+
         ByteSequenceBuilder outputByteStream = new ByteSequenceBuilder();
         ByteSequenceBuilder nicknames = new ByteSequenceBuilder();
 
-        //get padded nicknames as bytes
         for(String s: this.nicknames){
+            s += '\0';
             nicknames.append(s.getBytes(UTF_8));
-            nicknames.append(new byte[1]);
         }
 
         byte[] nickBytes = nicknames.toByteArray();
@@ -40,11 +49,7 @@ public class NicksPDU extends PDU {
         outputByteStream.append(OpCode.NICKS.value);
         outputByteStream.append((byte)this.nicknames.size());
 
-        //add padding if necessary
-        if(nickBytes.length < 256)
-            outputByteStream.append(new byte[1]);
-
-        outputByteStream.append((byte)nickBytes.length);
+        outputByteStream.appendShort((short)nickBytes.length);
         outputByteStream.append(nickBytes);
         outputByteStream.pad();
 
@@ -57,13 +62,21 @@ public class NicksPDU extends PDU {
 
     private static Set<String> getNicknamesFromByteArray(byte[] stream){
         Set<String> returnSet = new HashSet<>();
-        StringBuilder temp = new StringBuilder();
-        for(int i = 3; i < stream.length; ++i){
+        ByteSequenceBuilder temp = new ByteSequenceBuilder();
+
+        for(int i = 0; i < stream.length; ++i){
             temp.append(stream[i]);
 
             if(stream[i] == '\0'){
-                returnSet.add(temp.toString());
-                temp = new StringBuilder();
+                String myString = null;
+                try {
+                    myString = new String(temp.toByteArray(), "UTF-8");
+                    returnSet.add(myString);
+                    temp = new ByteSequenceBuilder();
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+                ++i;
             }
         }
         return returnSet;

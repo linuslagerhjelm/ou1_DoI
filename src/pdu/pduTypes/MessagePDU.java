@@ -6,6 +6,8 @@ import pdu.OpCode;
 import pdu.PDU;
 
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Date;
@@ -19,17 +21,20 @@ public class MessagePDU extends PDU {
     String nickname;
     Date timestamp;
 
-    public MessagePDU(byte[] inStream){
-        int messageLength = Integer.parseInt(""+inStream[4]+inStream[5]);
-        byte[] messByte = Arrays.copyOfRange(inStream, 12, messageLength);
-        this.message = messByte.toString();
+    public MessagePDU(InputStream inStream){
+        try {
+            readExactly(inStream, 1);
+            int nickLength = Byte.valueOf(readExactly(inStream, 1)[0]);
+            readExactly(inStream, 1);
+            int messageLength = byteArrayToShort(readExactly(inStream, 2));
+            readExactly(inStream, 2);
+            this.timestamp = new Date(byteArrayToLong(readExactly(inStream, 4))*1000);
+            this.message = new String(readExactly(inStream, messageLength), "UTF-8");
+            readExactly(inStream, (padLengths(messageLength)-messageLength));
+            this.nickname = new String(readExactly(inStream, nickLength), "UTF-8");
 
-        //determines if call comes from server or client
-        if(inStream[2] != 0){
-            byte[] timestamp = Arrays.copyOfRange(inStream, 4, 8);
-            this.timestamp = new Date(unsignedIntToLong(timestamp));
-            this.nickname = Arrays.copyOfRange(inStream,
-                    inStream.length-messageLength, inStream.length).toString();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -43,7 +48,7 @@ public class MessagePDU extends PDU {
             Date timestamp) {
         this.message = message;
         this.nickname = nickname;
-        this.timestamp = timestamp;
+        this.timestamp = new Date((timestamp.getTime()/1000)*1000);
     }
 
     @Override

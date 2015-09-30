@@ -5,6 +5,8 @@ import pdu.ByteSequenceBuilder;
 import pdu.OpCode;
 import pdu.PDU;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -13,8 +15,15 @@ public class ChNickPDU extends PDU {
 
     public String nickname;
 
-    public ChNickPDU(byte[] inStream){
-        nickname = Arrays.copyOfRange(inStream, 4, inStream.length).toString();
+    public ChNickPDU(InputStream inStream){
+        try {
+            int nickLength = Byte.valueOf(readExactly(inStream,1)[0]);
+            readExactly(inStream, 2);
+            this.nickname = new String(readExactly(inStream, nickLength), "UTF-8");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public ChNickPDU(String nickname) {

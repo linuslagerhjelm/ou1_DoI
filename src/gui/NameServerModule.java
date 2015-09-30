@@ -30,7 +30,7 @@ public class NameServerModule {
      * @param nameServerPort the port where the name server accepts connections
      */
     public void getServerList(String nameServerAddress, int nameServerPort) {
-        try{
+        /*try{
 
             DatagramSocket socket = new DatagramSocket();
             socket.setSoTimeout(1000);
@@ -51,7 +51,7 @@ public class NameServerModule {
                     DatagramPacket recievePacket = new DatagramPacket(buffer, buffer.length);
                     socket.receive(recievePacket);
 
-                    SListPDU pdu = new SListPDU(recievePacket.getData());
+                    SListPDU pdu = new SListPDU(recievePacket.);
                     if( !seqNo.contains(new Integer(PDU.byteArrayToInt(getListPDU)) )){
                         Set<SListPDU.ServerEntry> temp = pdu.getServerEntries();
                         for(SListPDU.ServerEntry se: temp){
@@ -72,7 +72,7 @@ public class NameServerModule {
         for(SListPDU.ServerEntry se: servers){
             setStrings.add(se.toStringArray());
         }
-        notifyListeners(setStrings);
+        notifyListeners(setStrings);*/
 
     }
 

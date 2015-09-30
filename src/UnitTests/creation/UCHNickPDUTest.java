@@ -54,21 +54,24 @@ public class UCHNickPDUTest {
 
     @Test
     public void shouldHaveCorrectOldNick() throws Exception {
-        byte[] ba = pdu.toByteArray();
-        byte[] nick = Arrays.copyOfRange(ba, 7, 9 + OLDNICK.length());
 
-        Assert.assertEquals(OLDNICK.getBytes(), nick);
+        byte[] ba = pdu.toByteArray();
+        byte[] nick = Arrays.copyOfRange(ba, 8, 8 + OLDNICK.length());
+
+        Assert.assertArrayEquals(OLDNICK.getBytes(UTF_8), nick);
     }
 
     @Test
     public void shouldHaveCorrectNewNick() throws Exception {
-        int pad1 = PDU.padLengths(OLDNICK.length())-OLDNICK.length();
-        int pad2 = PDU.padLengths(NEWNICK.length())-NEWNICK.length();
-        int jump = 9+OLDNICK.length()+pad1;
+        int oldNickLen = OLDNICK.getBytes(UTF_8).length;
+        int newNickLen = NEWNICK.getBytes(UTF_8).length;
+        int pad = PDU.padLengths(oldNickLen)-oldNickLen;
+        int start = 8+oldNickLen+pad;
+        int end = start+newNickLen;
         byte[] ba = pdu.toByteArray();
-        byte[] nick = Arrays.copyOfRange(ba, jump, ba.length-pad2);
+        byte[] nick = Arrays.copyOfRange(ba, start, end);
 
-        Assert.assertEquals(NEWNICK.getBytes(), nick);
+        Assert.assertArrayEquals(NEWNICK.getBytes(UTF_8), nick);
     }
 
     @Test
