@@ -32,6 +32,7 @@ public class MessagePDU extends PDU {
             this.message = new String(readExactly(inStream, messageLength), "UTF-8");
             readExactly(inStream, (padLengths(messageLength)-messageLength));
             this.nickname = new String(readExactly(inStream, nickLength), "UTF-8");
+            readExactly(inStream, padLengths(nickLength)-nickLength);
 
         } catch (IOException e) {
             e.printStackTrace();

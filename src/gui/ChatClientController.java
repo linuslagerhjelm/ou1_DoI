@@ -87,10 +87,9 @@ public class ChatClientController {
                 n -> SwingUtilities.invokeLater(() -> tab.removeNickname(n)));
         chatModule.addMessageListener(
                 m -> SwingUtilities.invokeLater(() -> tab.appendMessage(m)));
-        chatModule.addRecievNicksListeners(
-                m -> SwingUtilities.invokeLater(() -> tab.addNickname(m)));
         gui.getTabs().add(tab, address + ":" + port);
         gui.getTabs().setSelectedComponent(tab);
+        chatModule.startClient();
     }
 
     public static void main(String[] args) {

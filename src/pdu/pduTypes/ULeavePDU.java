@@ -23,6 +23,7 @@ public class ULeavePDU extends PDU {
             readExactly(inStream, 2);
             this.timestamp = new Date(byteArrayToLong(readExactly(inStream, 4))*1000);
             this.nickname = new String(readExactly(inStream, nickLength), "UTF-8");
+            readExactly(inStream, padLengths(nickLength)-nickLength);
 
         } catch (IOException e) {
             e.printStackTrace();

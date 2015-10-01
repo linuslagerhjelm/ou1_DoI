@@ -1,13 +1,16 @@
 package gui;
 
+import client.ClientPDUListener;
 import pdu.PDU;
 import pdu.pduTypes.*;
+import server.ClientThread;
 
 import java.io.*;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Model for chat module in clients.
@@ -19,7 +22,7 @@ public class ChatModule {
     private final List<Listener<String>> joinListeners = new ArrayList<>();
     private final List<Listener<String>> leaveListeners = new ArrayList<>();
     private final List<Listener<String>> messageListeners = new ArrayList<>();
-    private final List<Listener<String>> recievNicksListeners = new ArrayList<>();
+    private ConcurrentHashMap<String,ClientPDUListener> activeClients = new ConcurrentHashMap<>();
     private Socket socket;
     private String nickname;
 
@@ -35,22 +38,36 @@ public class ChatModule {
         this.nickname = nickname;
         try {
             this.socket = new Socket(InetAddress.getByName(address),port);
-            PDU pdu = new JoinPDU(nickname);
-            OutputStream outputStream = socket.getOutputStream();
-            outputStream.write(pdu.toByteArray());
-
-            PDU nicksPDU = PDU.fromInputStream(socket.getInputStream());
-
-            if(nicksPDU.toByteArray()[0] == 19){
-                Set<String> nicknames = ((NicksPDU)nicksPDU).getNicknames();
-                for(String s: nicknames){
-                    notifyRecieveNicksListeners(s);
-                }
-            }
-
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+    }
+    public void startClient(){
+
+        PDU join = new JoinPDU(nickname);
+        OutputStream outputStream = null;
+        InputStream inStream = null;
+        try {
+            outputStream = socket.getOutputStream();
+            inStream = socket.getInputStream();
+            outputStream.write(join.toByteArray());
+            PDU pdu = PDU.fromInputStream(inStream);
+
+            if(pdu instanceof NicksPDU){
+                Set<String> nicknames = ((NicksPDU)pdu).getNicknames();
+                for(String str: nicknames){
+                    notifyJoinListeners(str);
+                }
+                ClientPDUListener cpdul = new ClientPDUListener(inStream,outputStream, nickname, this);
+                activeClients.putIfAbsent(cpdul.getNickname(),cpdul);
+                Thread t = new Thread(cpdul);
+                t.start();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
     /**
@@ -100,7 +117,7 @@ public class ChatModule {
      *
      * @param nickname The nickname of the new member.
      */
-    private void notifyJoinListeners(String nickname) {
+    public void notifyJoinListeners(String nickname) {
         joinListeners.forEach(l -> l.update(nickname));
     }
 
@@ -109,7 +126,7 @@ public class ChatModule {
      *
      * @param nickname The nickname of the leaving member.
      */
-    private void notifyLeaveListeners(String nickname) {
+    public void notifyLeaveListeners(String nickname) {
         leaveListeners.forEach(l -> l.update(nickname));
     }
 
@@ -118,12 +135,8 @@ public class ChatModule {
      *
      * @param message The message.
      */
-    private void notifyMessageListeners(String message) {
+    public void notifyMessageListeners(String message) {
         messageListeners.forEach(l -> l.update(message));
-    }
-
-    private void notifyRecieveNicksListeners(String nick) {
-        recievNicksListeners.forEach(l -> l.update(nick));
     }
 
     /**
@@ -153,10 +166,4 @@ public class ChatModule {
         messageListeners.add(listener);
     }
 
-    /**
-     * Adds a listener to be notified when a NicksPDU is received.
-     *
-     * @param listener The listener whose update method will be called.
-     */
-    public void addRecievNicksListeners( Listener<String> listener) { recievNicksListeners.add(listener); }
 }

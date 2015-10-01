@@ -20,6 +20,7 @@ public class ChNickPDU extends PDU {
             int nickLength = Byte.valueOf(readExactly(inStream,1)[0]);
             readExactly(inStream, 2);
             nickname = new String(readExactly(inStream, nickLength), "UTF-8");
+            readExactly(inStream, padLengths(nickLength)-nickLength);
 
         } catch (IOException e) {
             e.printStackTrace();

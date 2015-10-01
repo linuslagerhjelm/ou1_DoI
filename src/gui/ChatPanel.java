@@ -95,7 +95,8 @@ public class ChatPanel extends JPanel {
         return messageInputField.getText();
     }
 
-    public void addNickname(String nickname) { memberListModel.addElement(nickname); }
+    public void addNickname(String nickname) {
+        memberListModel.addElement(nickname); }
 
     public void removeNickname(String nickname) {
         memberListModel.removeElement(nickname);

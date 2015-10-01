@@ -19,6 +19,7 @@ public class JoinPDU extends PDU {
             int nickLength = (int)byteArrayToLong(readExactly(inStream,1));
             readExactly(inStream, 2);
             nickname = new String(readExactly(inStream, nickLength), "UTF-8");
+            readExactly(inStream, padLengths(nickLength)-nickLength);
         } catch (IOException e) {
             e.printStackTrace();
         }

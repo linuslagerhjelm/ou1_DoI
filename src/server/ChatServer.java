@@ -1,5 +1,8 @@
 package server;
 
+import pdu.pduTypes.NicksPDU;
+import pdu.pduTypes.UJoinPDU;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.*;
@@ -38,8 +41,18 @@ public class ChatServer {
     }
 
     public void registerNewClient(ClientThread ct) {
-        if(connectedClients.containsKey(ct.getNickname()));
-            connectedClients.putIfAbsent(ct.getNickname(), ct);
+        if(!connectedClients.containsKey(ct.getNickname())) {
+            try {
+                Date timeStamp = new Date();
+                for(ClientThread t: connectedClients.values()){
+                    t.sendPDU(new UJoinPDU(ct.getNickname(), timeStamp));
+                }
+                connectedClients.putIfAbsent(ct.getNickname(), ct);
+                ct.sendPDU(new NicksPDU(connectedClients.keySet()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
     public void disconnectClient(ClientThread ct) {
         connectedClients.remove(ct.getNickname());

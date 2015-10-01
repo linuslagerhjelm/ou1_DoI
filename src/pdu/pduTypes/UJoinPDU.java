@@ -22,7 +22,7 @@ public class UJoinPDU extends PDU {
             readExactly(inStream, 2);
             timestamp = new Date(byteArrayToLong(readExactly(inStream, 4))*1000);
             nickname = new String(readExactly(inStream, nickLength), "UTF-8");
-
+            readExactly(inStream, padLengths(nickLength)-nickLength);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -45,7 +45,7 @@ public class UJoinPDU extends PDU {
 
         return outputByteStream.toByteArray();
     }
-
+    public String getNickname(){ return this.nickname; }
     private byte[] getTimestampFromDate(Date date){
         if(null == date){
             throw new NullPointerException();

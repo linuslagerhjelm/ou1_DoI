@@ -17,11 +17,16 @@ public class ClientThread implements Runnable{
     ChatServer server;
     Socket socket;
     String nickname;
+    OutputStream out;
 
     public ClientThread(Socket socket, ChatServer server) {
         this.server = server;
         this.socket = socket;
-
+        try {
+            this.out = socket.getOutputStream();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public String getNickname() {
@@ -31,37 +36,38 @@ public class ClientThread implements Runnable{
     @Override
     public void run() {
             try {
-                OutputStream out = socket.getOutputStream();
                 PDU pdu = PDU.fromInputStream(socket.getInputStream());
                 switch(pdu.toByteArray()[0]){
                     case 12:
-                        handleJoin((JoinPDU) pdu, out);
+                        handleJoin((JoinPDU) pdu);
                         break;
 
                     case 13:
-                        handleChNick((ChNickPDU)pdu, out);
+                        handleChNick((ChNickPDU)pdu);
                         break;
 
                     default:
-                        errorHandler(out);
+                        errorHandler();
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
     }
-    private void handleJoin(JoinPDU pdu,OutputStream out) throws IOException{
+    private void handleJoin(JoinPDU pdu) throws IOException{
         this.nickname = pdu.getNickname();
-        out.write(new NicksPDU(server.getNicknames()).toByteArray());
         server.registerNewClient(this);
+        //out.write(new NicksPDU(server.getNicknames()).toByteArray());
     }
 
-    private void handleChNick(ChNickPDU pdu,OutputStream out) throws IOException{
+    private void handleChNick(ChNickPDU pdu) throws IOException{
 
     }
 
-    private void errorHandler(OutputStream out) throws IOException {
+    private void errorHandler() throws IOException {
         out.write(new QuitPDU().toByteArray());
         server.disconnectClient(this);
-
+    }
+    public void sendPDU(PDU pdu) throws IOException{
+        out.write(pdu.toByteArray());
     }
 }

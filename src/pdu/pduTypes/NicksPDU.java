@@ -20,6 +20,7 @@ public class NicksPDU extends PDU {
             readExactly(inStream,1);
             int totalLength = (int) byteArrayToLong(readExactly(inStream, 2));
             nicknames = nicknamesFromByteArray(readExactly(inStream, totalLength));
+            readExactly(inStream, padLengths(totalLength)-totalLength);
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -21,6 +21,7 @@ public class RegPDU extends PDU {
             int snLength = (short)byteArrayToLong(readExactly(inStream, 1));
             this.TCPPort = (short)byteArrayToLong(readExactly(inStream,2));
             serverName = new String(readExactly(inStream, snLength), "UTF-8");
+            readExactly(inStream, padLengths(snLength)-snLength);
 
         } catch (IOException e) {
             e.printStackTrace();
