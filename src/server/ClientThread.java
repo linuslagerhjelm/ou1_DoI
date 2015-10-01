@@ -4,6 +4,7 @@ import pdu.PDU;
 import pdu.pduTypes.ChNickPDU;
 import pdu.pduTypes.JoinPDU;
 import pdu.pduTypes.NicksPDU;
+import pdu.pduTypes.QuitPDU;
 
 import java.io.*;
 import java.net.Socket;
@@ -40,6 +41,9 @@ public class ClientThread implements Runnable{
                     case 13:
                         handleChNick((ChNickPDU)pdu, out);
                         break;
+
+                    default:
+                        errorHandler(out);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -48,9 +52,16 @@ public class ClientThread implements Runnable{
     private void handleJoin(JoinPDU pdu,OutputStream out) throws IOException{
         this.nickname = pdu.getNickname();
         out.write(new NicksPDU(server.getNicknames()).toByteArray());
+        server.registerNewClient(this);
     }
 
     private void handleChNick(ChNickPDU pdu,OutputStream out) throws IOException{
+
+    }
+
+    private void errorHandler(OutputStream out) throws IOException {
+        out.write(new QuitPDU().toByteArray());
+        server.disconnectClient(this);
 
     }
 }

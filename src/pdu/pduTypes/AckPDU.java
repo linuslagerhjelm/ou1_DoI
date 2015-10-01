@@ -37,4 +37,8 @@ public class AckPDU extends PDU {
 
         return outputByteStream.toByteArray();
     }
+
+    public int getId() {
+        return this.id;
+    }
 }

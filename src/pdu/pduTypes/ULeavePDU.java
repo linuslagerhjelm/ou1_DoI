@@ -19,9 +19,9 @@ public class ULeavePDU extends PDU {
 
     public ULeavePDU(InputStream inStream){
         try {
-            int nickLength = Byte.valueOf(readExactly(inStream, 1)[0]);
+            int nickLength = (int)byteArrayToLong(readExactly(inStream, 1));
             readExactly(inStream, 2);
-            this.timestamp = new Date(byteArrayToLong(readExactly(inStream, 4)));
+            this.timestamp = new Date(byteArrayToLong(readExactly(inStream, 4))*1000);
             this.nickname = new String(readExactly(inStream, nickLength), "UTF-8");
 
         } catch (IOException e) {
@@ -31,7 +31,7 @@ public class ULeavePDU extends PDU {
 
     public ULeavePDU(String nickname, Date timestamp) {
         this.nickname = nickname;
-        this.timestamp = timestamp;
+        this.timestamp = new Date((timestamp.getTime()/1000)*1000);
     }
 
     @Override

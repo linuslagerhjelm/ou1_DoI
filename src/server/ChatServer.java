@@ -3,14 +3,14 @@ package server;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by id14llm on 2015-09-08.
  */
 public class ChatServer {
 
-    CopyOnWriteArrayList<Thread> connectedClient = new CopyOnWriteArrayList<>();
+    ConcurrentHashMap<String,ClientThread> connectedClients = new ConcurrentHashMap<>();
     private short id;
     int port;
     String serverName;
@@ -37,18 +37,16 @@ public class ChatServer {
         System.out.println("finnish");
     }
 
-    public void registerNewClient(Thread ct) {
-        connectedClient.add(ct);
+    public void registerNewClient(ClientThread ct) {
+        if(connectedClients.containsKey(ct.getNickname()));
+            connectedClients.putIfAbsent(ct.getNickname(), ct);
+    }
+    public void disconnectClient(ClientThread ct) {
+        connectedClients.remove(ct.getNickname());
     }
 
     public Set<String> getNicknames() {
-        Set<String> nicks = new HashSet<>();
-        //TODO: fix this
-        /*for(Thread ct: connectedClient){
-            nicks.add(ct.getNickname());
-        }*/
-        System.out.println(nicks.toString());
-        return nicks;
+        return connectedClients.keySet();
     }
 
     public void setId(short s) { this.id = s; }
@@ -56,11 +54,11 @@ public class ChatServer {
     public String getServerName() { return serverName; }
     public InetAddress getInetAddress() { return address; }
     public int getPort() { return port; }
-    public int getClientCount() { return connectedClient.size(); }
+    public int getClientCount() { return connectedClients.size(); }
 
     public static void main(String[] args) {
         try {
-            String[] strings = {"localhost", "Jakub", "8000"};
+            String[] strings = {"localhost", "Storm!", "8000"};
             ChatServer server = new ChatServer(strings);
         }
         catch (Exception ignore) {}

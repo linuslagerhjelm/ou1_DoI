@@ -1,6 +1,5 @@
 package UnitTests.creation;
 
-
 import UnitTests.AllPDUTests;
 import org.junit.Test;
 import pdu.OpCode;

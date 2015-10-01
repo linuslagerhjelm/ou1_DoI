@@ -16,13 +16,13 @@ import static org.junit.Assert.assertEquals;
  */
 public class ULeavePDUTest {
 
-    private final String NICKNAME = "Linus";
-    private Date TIMESTAMP = new Date();
-    private PDU pdu = new ULeavePDU(NICKNAME, TIMESTAMP);
+    private static final String NICKNAME = "Linus";
+    private static final Date TIMESTAMP = new Date(16038962198l);
+    private static final PDU pdu = new ULeavePDU(NICKNAME, TIMESTAMP);
 
     @Test
     public void shouldHaveCorrectOpCOde() throws Exception {
-        assertEquals(OpCode.UJOIN.value, pdu.toByteArray()[0]);
+        assertEquals(OpCode.ULEAVE.value, pdu.toByteArray()[0]);
     }
 
     @Test

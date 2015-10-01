@@ -3,9 +3,11 @@ package server;
 
 import pdu.ByteSequenceBuilder;
 import pdu.PDU;
+import pdu.pduTypes.AckPDU;
 import pdu.pduTypes.AlivePDU;
 import pdu.pduTypes.RegPDU;
 
+import java.io.ByteArrayInputStream;
 import java.net.*;
 
 /**
@@ -41,15 +43,13 @@ public class SendHeartBeatThread implements Runnable{
                 } catch(SocketTimeoutException e){
                     sendRegPdu(datagramSocket);
                 }
-                byte[] packetByte = packet.getData();
-                if(packetByte[0] == 1){
+                PDU pdu = PDU.fromInputStream(new ByteArrayInputStream(packet.getData()));
+                if(pdu.toByteArray()[0] == 1){
                     sendHeartBeat(datagramSocket);
-                    byte[] IDByte = new byte[2];
-                    IDByte[0] = packetByte[2];
-                    IDByte[1] = packetByte[3];
-                    chatServer.setId((short)PDU.byteArrayToShort(IDByte));
+                    short ID =(short) ((AckPDU)pdu).getId();
+                    chatServer.setId(ID);
                 }
-                else if(packetByte[0] == 100)
+                else if(pdu.toByteArray()[0] == 100)
                     sendRegPdu(datagramSocket);
 
                 Thread.sleep(8000);

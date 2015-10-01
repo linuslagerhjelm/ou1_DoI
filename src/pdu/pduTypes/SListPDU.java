@@ -47,6 +47,7 @@ public class SListPDU extends PDU {
 
         return outputByteStream.toByteArray();
     }
+
     public List<ServerEntry> getServerEntries(){ return entries; }
 
 

@@ -45,31 +45,30 @@ public class NameServerModule {
             socket.send(getListPacket);
             try{
                 boolean running = true;
-
-                //Runns untill all datagram packages has been recieved
                 while(running){
                     byte[] buffer = new byte[65507];
                     DatagramPacket recievePacket = new DatagramPacket(buffer, buffer.length);
                     socket.receive(recievePacket);
 
-                    SListPDU pdu = new SListPDU(new ByteArrayInputStream(recievePacket.getData()));
+                    SListPDU pdu = (SListPDU)PDU.fromInputStream(new ByteArrayInputStream(recievePacket.getData()));
+                    Integer currentSeqNo = new Integer(pdu.toByteArray()[1]);
 
-                    if( !seqNo.contains(new Integer(PDU.byteArrayToInt(getListPDU)) )){
+                    if( !seqNo.contains(currentSeqNo) ){
                         List<SListPDU.ServerEntry> temp = pdu.getServerEntries();
                         for(SListPDU.ServerEntry se: temp){
                             servers.add(se);
                         }
+                        if(pdu.toByteArray().length < 65507)
+                            running = false;
                     } else{
                         running = false;
                     }
-                    if(pdu.toByteArray().length < 65507)
-                        running = false;
 
                 }
             } catch (SocketTimeoutException e) { getServerList(nameServerAddress, nameServerPort); }
         } catch (Exception e) {e.printStackTrace();}
 
-        //Orders the data as a collection of String[]
+        //Converts server entries to String[]
         ArrayList<String[]> setStrings = new ArrayList<>();
         for(SListPDU.ServerEntry se: servers){
             setStrings.add(se.toStringArray());

@@ -19,6 +19,7 @@ public class ChatModule {
     private final List<Listener<String>> joinListeners = new ArrayList<>();
     private final List<Listener<String>> leaveListeners = new ArrayList<>();
     private final List<Listener<String>> messageListeners = new ArrayList<>();
+    private final List<Listener<String>> recievNicksListeners = new ArrayList<>();
     private Socket socket;
     private String nickname;
 
@@ -43,18 +44,13 @@ public class ChatModule {
             if(nicksPDU.toByteArray()[0] == 19){
                 Set<String> nicknames = ((NicksPDU)nicksPDU).getNicknames();
                 for(String s: nicknames){
-                    notifyMessageListeners(s);
+                    notifyRecieveNicksListeners(s);
                 }
             }
 
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        // TODO replace with other stuff, threads for example
-        /*System.err.println(
-                "Attempting to join server at " + address + ":" + port +
-                " with nickname \"" + nickname + "\"");*/
     }
 
     /**
@@ -126,6 +122,10 @@ public class ChatModule {
         messageListeners.forEach(l -> l.update(message));
     }
 
+    private void notifyRecieveNicksListeners(String nick) {
+        recievNicksListeners.forEach(l -> l.update(nick));
+    }
+
     /**
      * Adds a listener to be notified when a new member joins the chat.
      *
@@ -152,4 +152,11 @@ public class ChatModule {
     public void addMessageListener(Listener<String> listener) {
         messageListeners.add(listener);
     }
+
+    /**
+     * Adds a listener to be notified when a NicksPDU is received.
+     *
+     * @param listener The listener whose update method will be called.
+     */
+    public void addRecievNicksListeners( Listener<String> listener) { recievNicksListeners.add(listener); }
 }

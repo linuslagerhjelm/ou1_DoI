@@ -1,8 +1,5 @@
 package server;
 
-import pdu.ByteSequenceBuilder;
-import pdu.PDU;
-
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -19,15 +16,17 @@ public class ConnectionListener implements Runnable {
     }
     @Override
     public void run() {
-        try {
-            ServerSocket serverSocket = new ServerSocket(server.getPort());
-            Socket socket = serverSocket.accept();
-            if(socket.isConnected()){
-                server.registerNewClient(new Thread(new ClientThread(socket, server)));
+            try {
+                ServerSocket serverSocket = new ServerSocket(server.getPort());
+                while (true){
+                    Socket socket = serverSocket.accept();
+                    if(socket.isConnected()){
+                        Thread t = new Thread(new ClientThread(socket, server));
+                        t.start();
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 }

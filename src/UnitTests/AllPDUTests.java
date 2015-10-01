@@ -9,6 +9,7 @@ import org.junit.runners.Suite;
 import pdu.PDU;
 import pdu.pduTypes.GetListPDU;
 import pdu.pduTypes.QuitPDU;
+import pdu.pduTypes.ULeavePDU;
 
 
 import java.io.ByteArrayInputStream;
@@ -34,6 +35,7 @@ import static org.junit.Assert.assertEquals;
         NicksPDUTest.class,
         SListPDUTest.class,
         UJoinPDUTest.class,
+        ULeavePDUTest.class,
         StreamTest.class
 })
 public class AllPDUTests {
