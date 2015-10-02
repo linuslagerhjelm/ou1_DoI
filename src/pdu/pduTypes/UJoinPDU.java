@@ -8,7 +8,6 @@ import pdu.PDU;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.Date;
 
 public class UJoinPDU extends PDU {
@@ -42,6 +41,7 @@ public class UJoinPDU extends PDU {
         outputByteStream.append(new byte[2]);
         outputByteStream.append(getTimestampFromDate(timestamp));
         outputByteStream.append(nickname.getBytes());
+        outputByteStream.pad();
 
         return outputByteStream.toByteArray();
     }

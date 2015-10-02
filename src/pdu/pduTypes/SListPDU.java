@@ -1,6 +1,5 @@
 package pdu.pduTypes;
 
-import org.testng.collections.Lists;
 import pdu.ByteSequenceBuilder;
 import pdu.OpCode;
 import pdu.PDU;
@@ -8,7 +7,8 @@ import pdu.PDU;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -52,6 +52,7 @@ public class SListPDU extends PDU {
 
 
     public static class ServerEntry {
+
 
         public final String serverName;
         private InetAddress address;

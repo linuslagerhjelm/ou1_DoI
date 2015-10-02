@@ -30,51 +30,61 @@ public class NameServerModule {
      * @param nameServerAddress the address to the name server
      * @param nameServerPort the port where the name server accepts connections
      */
-    public void getServerList(String nameServerAddress, int nameServerPort) {
-        try{
+    public void getServerList(String nameServerAddress, int nameServerPort)  {
+        new Thread(){
+            @Override
+        public void run(){
+                try
+                {
 
-            DatagramSocket socket = new DatagramSocket();
-            socket.setSoTimeout(1000);
-            InetAddress address = InetAddress.getByName(nameServerAddress);
-            byte[] getListPDU = new GetListPDU().toByteArray();
-            DatagramPacket getListPacket = new DatagramPacket(getListPDU, getListPDU.length, address, nameServerPort);
+                    DatagramSocket socket = new DatagramSocket();
+                    socket.setSoTimeout(10000);
+                    InetAddress address = InetAddress.getByName(nameServerAddress);
+                    byte[] getListPDU = new GetListPDU().toByteArray();
+                    DatagramPacket getListPacket = new DatagramPacket(getListPDU, getListPDU.length, address, nameServerPort);
 
-            servers = new ArrayList<>();
-            seqNo = new ArrayList<>();
+                    servers = new ArrayList<>();
+                    seqNo = new ArrayList<>();
 
-            socket.send(getListPacket);
-            try{
-                boolean running = true;
-                while(running){
-                    byte[] buffer = new byte[65507];
-                    DatagramPacket recievePacket = new DatagramPacket(buffer, buffer.length);
-                    socket.receive(recievePacket);
+                    socket.send(getListPacket);
+                    try {
+                        byte[] buffer = new byte[65507];
+                        DatagramPacket recievePacket = new DatagramPacket(buffer, buffer.length);
 
-                    SListPDU pdu = (SListPDU)PDU.fromInputStream(new ByteArrayInputStream(recievePacket.getData()));
-                    Integer currentSeqNo = new Integer(pdu.toByteArray()[1]);
+                        while (true) {
 
-                    if( !seqNo.contains(currentSeqNo) ){
-                        List<SListPDU.ServerEntry> temp = pdu.getServerEntries();
-                        for(SListPDU.ServerEntry se: temp){
-                            servers.add(se);
+                            socket.receive(recievePacket);
+
+                            SListPDU pdu = (SListPDU) PDU.fromInputStream(new ByteArrayInputStream(recievePacket.getData()));
+                            Integer currentSeqNo = new Integer(pdu.toByteArray()[1]);
+
+                            if (!seqNo.contains(currentSeqNo)) {
+                                List<SListPDU.ServerEntry> temp = pdu.getServerEntries();
+                                for (SListPDU.ServerEntry se : temp) {
+                                    servers.add(se);
+                                }
+                            }
+                            //Converts server entries to String[]
+                            ArrayList<String[]> setStrings = new ArrayList<>();
+                            for (SListPDU.ServerEntry se : servers) {
+                                setStrings.add(se.toStringArray());
+                            }
+                            notifyListeners(setStrings);
                         }
-                        if(pdu.toByteArray().length < 65507)
-                            running = false;
-                    } else{
-                        running = false;
+                    } catch (SocketTimeoutException e) {
                     }
-
                 }
-            } catch (SocketTimeoutException e) { getServerList(nameServerAddress, nameServerPort); }
-        } catch (Exception e) {e.printStackTrace();}
+                catch(
+                        Exception e
+                        )
+                {
+                    e.printStackTrace();
+                }
+                        }
 
-        //Converts server entries to String[]
-        ArrayList<String[]> setStrings = new ArrayList<>();
-        for(SListPDU.ServerEntry se: servers){
-            setStrings.add(se.toStringArray());
-        }
-        notifyListeners(setStrings);
+                }.start();
     }
+
 
     /**
      * Adds a listener to be notified when a new server lit has been created.

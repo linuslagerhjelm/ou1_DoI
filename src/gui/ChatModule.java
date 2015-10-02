@@ -2,14 +2,20 @@ package gui;
 
 import client.ClientPDUListener;
 import pdu.PDU;
-import pdu.pduTypes.*;
-import server.ClientThread;
+import pdu.pduTypes.JoinPDU;
+import pdu.pduTypes.MessagePDU;
+import pdu.pduTypes.NicksPDU;
+import pdu.pduTypes.ULeavePDU;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.InetAddress;
-import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -48,6 +54,7 @@ public class ChatModule {
         PDU join = new JoinPDU(nickname);
         OutputStream outputStream = null;
         InputStream inStream = null;
+
         try {
             outputStream = socket.getOutputStream();
             inStream = socket.getInputStream();

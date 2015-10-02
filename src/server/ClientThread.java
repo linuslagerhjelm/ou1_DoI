@@ -3,10 +3,10 @@ package server;
 import pdu.PDU;
 import pdu.pduTypes.ChNickPDU;
 import pdu.pduTypes.JoinPDU;
-import pdu.pduTypes.NicksPDU;
 import pdu.pduTypes.QuitPDU;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.Socket;
 
 
@@ -35,19 +35,23 @@ public class ClientThread implements Runnable{
 
     @Override
     public void run() {
+
             try {
-                PDU pdu = PDU.fromInputStream(socket.getInputStream());
-                switch(pdu.toByteArray()[0]){
-                    case 12:
-                        handleJoin((JoinPDU) pdu);
-                        break;
+                while(true) {
+                    PDU pdu = PDU.fromInputStream(socket.getInputStream());
+                    switch (pdu.toByteArray()[0]) {
+                        case 12:
+                            handleJoin((JoinPDU) pdu);
+                            break;
 
-                    case 13:
-                        handleChNick((ChNickPDU)pdu);
-                        break;
+                        case 13:
+                            handleChNick((ChNickPDU) pdu);
+                            break;
 
-                    default:
-                        errorHandler();
+                        default:
+                            //errorHandler();
+                            System.out.println("Fel som fan !");
+                    }
                 }
             } catch (IOException e) {
                 e.printStackTrace();

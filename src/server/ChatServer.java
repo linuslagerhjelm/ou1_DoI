@@ -34,26 +34,31 @@ public class ChatServer {
 
         sendHeartbeat.start();
         recieveConnections.start();
+        //Kolla om det finns något i kön
+        //Håll koll på kön om något finns i kön skicka det
 
         sendHeartbeat.join();
         recieveConnections.join();
         System.out.println("finnish");
     }
 
-    public void registerNewClient(ClientThread ct) {
-        if(!connectedClients.containsKey(ct.getNickname())) {
-            try {
-                Date timeStamp = new Date();
-                for(ClientThread t: connectedClients.values()){
-                    t.sendPDU(new UJoinPDU(ct.getNickname(), timeStamp));
+        public void registerNewClient(ClientThread ct) {
+            if(!connectedClients.containsKey(ct.getNickname())) {
+                try {
+                    Date timeStamp = new Date();
+                    for(ClientThread t: connectedClients.values()){
+                        t.sendPDU(new UJoinPDU(ct.getNickname(), timeStamp));
+                        System.out.println("INNE");
+                    }
+                    connectedClients.putIfAbsent(ct.getNickname(), ct);
+                    //Lägg till i kön
+                    ct.sendPDU(new NicksPDU(connectedClients.keySet()));
+                    System.out.println("UTE");
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-                connectedClients.putIfAbsent(ct.getNickname(), ct);
-                ct.sendPDU(new NicksPDU(connectedClients.keySet()));
-            } catch (IOException e) {
-                e.printStackTrace();
             }
         }
-    }
     public void disconnectClient(ClientThread ct) {
         connectedClients.remove(ct.getNickname());
     }
@@ -71,7 +76,7 @@ public class ChatServer {
 
     public static void main(String[] args) {
         try {
-            String[] strings = {"localhost", "Storm!", "8000"};
+            String[] strings = {"localhost", "Storm", "8000"};
             ChatServer server = new ChatServer(strings);
         }
         catch (Exception ignore) {}
