@@ -15,7 +15,6 @@ public class AlivePDU extends PDU {
         try {
             this.clientCount = (byte) byteArrayToLong(readExactly(inStream, 1));
             this.id = (short) byteArrayToLong(readExactly(inStream, 2));
-
         } catch (IOException e) {
             e.printStackTrace();
         }

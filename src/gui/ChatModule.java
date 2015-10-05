@@ -18,7 +18,6 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Model for chat module in clients.
  * <br/>
- * TODO replace code where indicated.
  */
 public class ChatModule {
 
@@ -95,7 +94,6 @@ public class ChatModule {
      * @param newNick The desired nickname.
      */
     public void changeNick(String newNick) {
-        System.out.println("Registred chnick");
         PDU pdu = new ChNickPDU(newNick);
         try {
             OutputStream out = socket.getOutputStream();
@@ -109,7 +107,6 @@ public class ChatModule {
      * Call this to leave the chat.
      */
     public void leave() {
-        // TODO and here
         PDU pdu = new ULeavePDU(this.nickname, new Date());
         try {
             OutputStream dataOut = socket.getOutputStream();

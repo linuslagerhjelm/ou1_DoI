@@ -47,6 +47,7 @@ public class ClientPDUListener implements Runnable{
                 }
                 else if (pdu instanceof MessagePDU){
                     String s = ((MessagePDU)pdu).getMessage();
+                    s += "\n";
                     module.notifyMessageListeners(s);
                 }
             }

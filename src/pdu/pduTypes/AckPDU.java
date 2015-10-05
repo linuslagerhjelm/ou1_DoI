@@ -17,7 +17,6 @@ public class AckPDU extends PDU {
         try {
             readExactly(inStream, 1);
             this.id = byteArrayToShort(readExactly(inStream, 2));
-
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -44,14 +44,13 @@ public class ClientThread implements Runnable{
                     else if(pdu instanceof ChNickPDU)
                         handleChNick((ChNickPDU) pdu);
                     else if(pdu instanceof MessagePDU){
-                        System.out.println("In correct if-statement");
                         handleMessage((MessagePDU) pdu);
                     }
                     else if(pdu instanceof QuitPDU)
                         handleQuit();
 
                     else errorHandler();
-                    }
+                }
             }catch (SocketException ex){
                 try {
                     handleQuit();
@@ -68,13 +67,11 @@ public class ClientThread implements Runnable{
         server.registerNewClient(this);
     }
     private void handleChNick(ChNickPDU pdu) throws Exception{
-        System.out.println("PDU recieved");
         server.changeNick(nickname, pdu.getNickname());
         this.nickname = pdu.getNickname();
     }
     private void handleMessage(MessagePDU pdu) throws IOException{
         try {
-            System.out.println("recieved message");
             server.queueEvent(pdu);
         } catch (Exception e) { e.printStackTrace(); }
     }

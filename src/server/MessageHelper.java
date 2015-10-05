@@ -2,6 +2,8 @@ package server;
 
 import pdu.PDU;
 
+import java.util.Collection;
+
 /**
  * Created by id14llm on 2015-10-05.
  */
@@ -15,19 +17,20 @@ public class MessageHelper implements Runnable{
     @Override
     public void run() {
         while (true) {
-            if(!server.getQueuedEvents().isEmpty())
-                treatQueue();
+            treatQueue();
         }
     }
 
     private void treatQueue() {
-        try {
-            for (PDU pdu : server.getQueuedEvents()) {
-                for (ClientThread client : server.getConnectedClients().values()) {
-                    client.sendPDU(pdu);
+            try {
+                PDU pdu = server.getQueuedEvents().take();
+                if(pdu != null){
+                    Collection<ClientThread> iter =  server.getConnectedClients().values();
+                    for (ClientThread client : iter) {
+                        client.sendPDU(pdu);
+                    }
                 }
-                server.dequeueEvent(pdu);
-            }
-        } catch(Exception e) { e.printStackTrace(); }
+            } catch(Exception e) { e.printStackTrace(); }
+        }
     }
-}
+

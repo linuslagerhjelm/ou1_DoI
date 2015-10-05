@@ -44,12 +44,10 @@ public class ChatServer {
         recieveConnections.start();
         messageHelperThread.start();
 
-        //Håll koll på kön om något finns i kön skicka det
-
+        //Join threads eventually
         sendHeartbeat.join();
         recieveConnections.join();
         messageHelperThread.join();
-        System.out.println("finnish");
     }
 
     public void registerNewClient(ClientThread ct) {
@@ -58,7 +56,6 @@ public class ChatServer {
             try {
                 queueEvent(new UJoinPDU(ct.getNickname(), timeStamp));
 
-                //TODO: Make a nicer implementation than thread sleep
                 Thread.sleep(100);
                 connectedClients.put(ct.getNickname(), ct);
                 ct.sendPDU(new NicksPDU(connectedClients.keySet()));
@@ -73,7 +70,7 @@ public class ChatServer {
         connectedClients.putIfAbsent(newNick, temp);
         try {
             queuedEvents.put(new UCNickPDU(new Date(), oldNick, newNick));
-        } catch (InterruptedException e) { e.printStackTrace(); }
+        } catch (Exception e) { e.printStackTrace(); }
     }
     public void disconnectClient(ClientThread ct) {
         connectedClients.remove(ct.getNickname());
@@ -94,9 +91,7 @@ public class ChatServer {
     public int getClientCount() { return connectedClients.size(); }
     public LinkedBlockingQueue<PDU> getQueuedEvents() { return queuedEvents; }
     public ConcurrentHashMap<String,ClientThread> getConnectedClients() { return connectedClients; }
-    public void dequeueEvent(PDU pdu) {
-        queuedEvents.remove(pdu);
-    }
+
 
     public static void main(String[] args) {
         try {

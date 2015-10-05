@@ -81,13 +81,12 @@ public class MessagePDU extends PDU {
         }
 
         outputByteStream.append(messageBytes);
+        outputByteStream.pad();
 
         try{
             outputByteStream.append(this.nickname.getBytes());
             outputByteStream.pad();
-        } catch (NullPointerException e){
-
-        }
+        } catch (NullPointerException e){}
 
         byte[] byteArray = outputByteStream.toByteArray();
         byteArray[3] = Checksum.computeChecksum(byteArray);

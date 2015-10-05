@@ -30,7 +30,6 @@ public class UCNickPDU extends PDU {
             readExactly(inStream, padLengths(oldNickLength)-oldNickLength);
             this.newNick = new String(readExactly(inStream, newNickLength), "UTF-8");
             readExactly(inStream, padLengths(newNickLength)-newNickLength);
-
         } catch (IOException e) {
             e.printStackTrace();
         }

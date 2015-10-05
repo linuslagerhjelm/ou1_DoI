@@ -36,7 +36,6 @@ public abstract class PDU {
     public static PDU fromInputStream(InputStream inStream) throws IOException {
 
         int pduChooser = (int)byteArrayToLong(readExactly(inStream,1));
-
         switch(pduChooser){
             case 0:
                 return new RegPDU(inStream);
@@ -45,13 +44,13 @@ public abstract class PDU {
             case 2:
                 return new AlivePDU(inStream);
             case 3:
-                return new GetListPDU();
+                return new GetListPDU(inStream);
             case 4:
                 return new SListPDU(inStream);
             case 10:
                 return new MessagePDU(inStream);
             case 11:
-                return new QuitPDU();
+                return new QuitPDU(inStream);
             case 12:
                 return new JoinPDU(inStream);
             case 13:
@@ -65,7 +64,7 @@ public abstract class PDU {
             case 19:
                 return new NicksPDU(inStream);
             case 100:
-                return new NotRegPDU();
+                return new NotRegPDU(inStream);
             default:
                 return null;
         }
