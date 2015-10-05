@@ -8,6 +8,8 @@ import pdu.PDU;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class UJoinPDU extends PDU {
@@ -30,6 +32,11 @@ public class UJoinPDU extends PDU {
     public UJoinPDU(String nickname, Date timestamp) {
         this.nickname = nickname;
         this.timestamp = new Date((timestamp.getTime()/1000)*1000);
+    }
+    public String getDate(){
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss");
+        String strDate = dateFormat.format(timestamp);
+        return strDate;
     }
 
     @Override

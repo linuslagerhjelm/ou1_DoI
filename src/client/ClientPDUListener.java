@@ -36,7 +36,9 @@ public class ClientPDUListener implements Runnable{
 
                 if(pdu instanceof UJoinPDU){
                     String s = ((UJoinPDU)pdu).getNickname();
+                    String time = ((UJoinPDU)pdu).getDate();
                     module.notifyJoinListeners(s);
+                    module.notifyMessageListeners("["+time+"] "+s+" has joined the chat\n");
                 }
                 else if (pdu instanceof UCNickPDU){
                     String old = ((UCNickPDU)pdu).getOldNick();
