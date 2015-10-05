@@ -34,7 +34,9 @@ public class ChatServer {
 
         sendHeartbeat.start();
         recieveConnections.start();
-        //Kolla om det finns något i kön
+
+
+
         //Håll koll på kön om något finns i kön skicka det
 
         sendHeartbeat.join();
@@ -51,7 +53,6 @@ public class ChatServer {
                         System.out.println("INNE");
                     }
                     connectedClients.putIfAbsent(ct.getNickname(), ct);
-                    //Lägg till i kön
                     ct.sendPDU(new NicksPDU(connectedClients.keySet()));
                     System.out.println("UTE");
                 } catch (IOException e) {
@@ -76,7 +77,7 @@ public class ChatServer {
 
     public static void main(String[] args) {
         try {
-            String[] strings = {"localhost", "Storm", "8000"};
+            String[] strings = {"localhost", "TAGGA FREDAG ", "8000"};
             ChatServer server = new ChatServer(strings);
         }
         catch (Exception ignore) {}
