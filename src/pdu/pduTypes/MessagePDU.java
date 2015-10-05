@@ -9,6 +9,8 @@ import pdu.PDU;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 
@@ -54,6 +56,14 @@ public class MessagePDU extends PDU {
 
     public String getMessage(){
         return message;
+    }
+    public String getNickname(){
+        return nickname;
+    }
+    public String getDate(){
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss");
+        String strDate = dateFormat.format(timestamp);
+        return strDate;
     }
 
     @Override

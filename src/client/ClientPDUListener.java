@@ -30,7 +30,6 @@ public class ClientPDUListener implements Runnable{
 
     @Override
     public void run() {
-        System.out.println(nickname+" = "+Thread.currentThread().getId());
         try {
             while(true){
                 PDU pdu = PDU.fromInputStream(in);
@@ -47,8 +46,10 @@ public class ClientPDUListener implements Runnable{
                 }
                 else if (pdu instanceof MessagePDU){
                     String s = ((MessagePDU)pdu).getMessage();
+                    String sender = ((MessagePDU)pdu).getNickname();
+                    String time = ((MessagePDU)pdu).getDate();
                     s += "\n";
-                    module.notifyMessageListeners(s);
+                    module.notifyMessageListeners("["+time+"] "+sender+" says: "+s);
                 }
             }
 

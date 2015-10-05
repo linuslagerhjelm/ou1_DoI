@@ -72,7 +72,8 @@ public class ClientThread implements Runnable{
     }
     private void handleMessage(MessagePDU pdu) throws IOException{
         try {
-            server.queueEvent(pdu);
+            MessagePDU mesFromServer = new MessagePDU(pdu.getMessage(), this.nickname, new Date());
+            server.queueEvent(mesFromServer);
         } catch (Exception e) { e.printStackTrace(); }
     }
     private void errorHandler() throws IOException {
