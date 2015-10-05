@@ -2,10 +2,7 @@ package gui;
 
 import client.ClientPDUListener;
 import pdu.PDU;
-import pdu.pduTypes.JoinPDU;
-import pdu.pduTypes.MessagePDU;
-import pdu.pduTypes.NicksPDU;
-import pdu.pduTypes.ULeavePDU;
+import pdu.pduTypes.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -83,7 +80,6 @@ public class ChatModule {
      * @param message The message to send.
      */
     public void sendMessage(String message) {
-        // TODO actually send the message
         PDU pdu = new MessagePDU(message);
         try {
             OutputStream dataOut = socket.getOutputStream();
@@ -91,8 +87,6 @@ public class ChatModule {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        //System.err.println("Sending message: \"" + message + "\"");
     }
 
     /**
@@ -101,8 +95,14 @@ public class ChatModule {
      * @param newNick The desired nickname.
      */
     public void changeNick(String newNick) {
-        // TODO do smth here
-        System.err.println("Changing nickname to: \"" + newNick + "\"");
+        System.out.println("Registred chnick");
+        PDU pdu = new ChNickPDU(newNick);
+        try {
+            OutputStream out = socket.getOutputStream();
+            out.write(pdu.toByteArray());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**

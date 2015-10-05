@@ -70,7 +70,6 @@ public class SendHeartBeatThread implements Runnable{
     private void sendHeartBeat(DatagramSocket socket) throws Exception{
         byte[] pdu = new AlivePDU((byte)chatServer.getClientCount(), chatServer.getId()).toByteArray();
         DatagramPacket UDPpacket = new DatagramPacket(pdu, pdu.length,nameServerAddress, nameServerPort);
-
         socket.send(UDPpacket);
     }
 }

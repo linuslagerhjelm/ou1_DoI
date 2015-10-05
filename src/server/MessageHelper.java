@@ -15,7 +15,7 @@ public class MessageHelper implements Runnable{
     @Override
     public void run() {
         while (true) {
-            if(server.getQueuedEvents().size() > 0)
+            if(!server.getQueuedEvents().isEmpty())
                 treatQueue();
         }
     }

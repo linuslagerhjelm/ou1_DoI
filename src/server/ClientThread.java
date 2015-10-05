@@ -1,14 +1,13 @@
 package server;
 
 import pdu.PDU;
-import pdu.pduTypes.ChNickPDU;
-import pdu.pduTypes.JoinPDU;
-import pdu.pduTypes.MessagePDU;
-import pdu.pduTypes.QuitPDU;
+import pdu.pduTypes.*;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.SocketException;
+import java.util.Date;
 
 
 /**
@@ -44,14 +43,23 @@ public class ClientThread implements Runnable{
                         handleJoin((JoinPDU) pdu);
                     else if(pdu instanceof ChNickPDU)
                         handleChNick((ChNickPDU) pdu);
-                    else if(pdu instanceof MessagePDU)
+                    else if(pdu instanceof MessagePDU){
+                        System.out.println("In correct if-statement");
                         handleMessage((MessagePDU) pdu);
+                    }
                     else if(pdu instanceof QuitPDU)
                         handleQuit();
 
                     else errorHandler();
                     }
-            } catch (IOException e) {
+            }catch (SocketException ex){
+                try {
+                    handleQuit();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            catch (Exception e) {
                 e.printStackTrace();
             }
     }
@@ -59,12 +67,14 @@ public class ClientThread implements Runnable{
         this.nickname = pdu.getNickname();
         server.registerNewClient(this);
     }
-    private void handleChNick(ChNickPDU pdu) throws IOException{
+    private void handleChNick(ChNickPDU pdu) throws Exception{
+        System.out.println("PDU recieved");
         server.changeNick(nickname, pdu.getNickname());
         this.nickname = pdu.getNickname();
     }
     private void handleMessage(MessagePDU pdu) throws IOException{
         try {
+            System.out.println("recieved message");
             server.queueEvent(pdu);
         } catch (Exception e) { e.printStackTrace(); }
     }

@@ -2,6 +2,8 @@ package client;
 
 import gui.ChatModule;
 import pdu.PDU;
+import pdu.pduTypes.MessagePDU;
+import pdu.pduTypes.UCNickPDU;
 import pdu.pduTypes.UJoinPDU;
 
 import java.io.IOException;
@@ -30,16 +32,22 @@ public class ClientPDUListener implements Runnable{
     public void run() {
         System.out.println(nickname+" = "+Thread.currentThread().getId());
         try {
-            //OutputStream out = socket.getOutputStream();
             while(true){
                 PDU pdu = PDU.fromInputStream(in);
 
-                switch (pdu.toByteArray()[0]){
-                    case 16:
-                        System.out.println("Registered new client on "+Thread.currentThread().getId());
-                        String s = ((UJoinPDU)pdu).getNickname();
-                        module.notifyJoinListeners(s);
-                        break;
+                if(pdu instanceof UJoinPDU){
+                    String s = ((UJoinPDU)pdu).getNickname();
+                    module.notifyJoinListeners(s);
+                }
+                else if (pdu instanceof UCNickPDU){
+                    String old = ((UCNickPDU)pdu).getOldNick();
+                    String newNick = ((UCNickPDU)pdu).getNewNick();
+                    module.notifyLeaveListeners(old);
+                    module.notifyJoinListeners(newNick);
+                }
+                else if (pdu instanceof MessagePDU){
+                    String s = ((MessagePDU)pdu).getMessage();
+                    module.notifyMessageListeners(s);
                 }
             }
 

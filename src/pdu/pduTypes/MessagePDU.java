@@ -52,6 +52,10 @@ public class MessagePDU extends PDU {
         this.timestamp = new Date((timestamp.getTime()/1000)*1000);
     }
 
+    public String getMessage(){
+        return message;
+    }
+
     @Override
     public byte[] toByteArray() {
         ByteSequenceBuilder outputByteStream = new ByteSequenceBuilder();

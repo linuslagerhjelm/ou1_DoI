@@ -57,4 +57,11 @@ public class UCNickPDU extends PDU {
 
         return outputByteStream.toByteArray();
     }
+
+    public String getOldNick(){
+        return oldNick;
+    }
+    public String getNewNick() {
+        return newNick;
+    }
 }
