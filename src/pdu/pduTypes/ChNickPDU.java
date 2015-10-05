@@ -43,4 +43,8 @@ public class ChNickPDU extends PDU {
 
         return outputByteStream.toByteArray();
     }
+
+    public String getNickname() {
+        return nickname;
+    }
 }
