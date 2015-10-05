@@ -4,8 +4,18 @@ import pdu.ByteSequenceBuilder;
 import pdu.OpCode;
 import pdu.PDU;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 public class QuitPDU extends PDU {
 
+    public QuitPDU(InputStream inputStream){
+        try {
+            readExactly(inputStream, 3);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
     public QuitPDU(){}
 
     @Override

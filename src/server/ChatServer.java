@@ -23,6 +23,7 @@ public class ChatServer {
     private int port;
     private String serverName;
     private InetAddress address;
+    private Thread messageHelperThread;
 
     public ChatServer(String args[]) throws IOException, InterruptedException {
 
@@ -37,7 +38,7 @@ public class ChatServer {
 
         Thread recieveConnections = new Thread(connectionListener);
         Thread sendHeartbeat = new Thread(sendHb);
-        Thread messageHelperThread = new Thread(messageHelper);
+        this.messageHelperThread = new Thread(messageHelper);
 
         sendHeartbeat.start();
         recieveConnections.start();
@@ -53,16 +54,15 @@ public class ChatServer {
 
     public void registerNewClient(ClientThread ct) {
         if(!connectedClients.containsKey(ct.getNickname())) {
+            Date timeStamp = new Date();
             try {
-                Date timeStamp = new Date();
-                    try {
-                        queueEvent(new UJoinPDU(ct.getNickname(), timeStamp));
-                        connectedClients.putIfAbsent(ct.getNickname(), ct);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                queueEvent(new UJoinPDU(ct.getNickname(), timeStamp));
+
+                //TODO: Make a nicer implementation than thread sleep
+                Thread.sleep(100);
+                connectedClients.put(ct.getNickname(), ct);
                 ct.sendPDU(new NicksPDU(connectedClients.keySet()));
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -100,7 +100,7 @@ public class ChatServer {
 
     public static void main(String[] args) {
         try {
-            String[] strings = {"localhost", "TAGGA FREDAG ", "8000"};
+            String[] strings = {"localhost", "E d fest?", "8000"};
             ChatServer server = new ChatServer(strings);
         }
         catch (Exception ignore) {}
