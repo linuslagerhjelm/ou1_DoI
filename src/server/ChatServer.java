@@ -86,11 +86,12 @@ public class ChatServer {
     public void setId(short s) { this.id = s; }
     public short getId(){ return id; }
     public String getServerName() { return serverName; }
-    public InetAddress getInetAddress() { return address; }
     public int getPort() { return port; }
     public int getClientCount() { return connectedClients.size(); }
     public LinkedBlockingQueue<PDU> getQueuedEvents() { return queuedEvents; }
-    public ConcurrentHashMap<String,ClientThread> getConnectedClients() { return connectedClients; }
+    public ConcurrentHashMap<String,ClientThread> getConnectedClients() {
+        return connectedClients;
+    }
 
 
     public static void main(String[] args) {
@@ -102,6 +103,4 @@ public class ChatServer {
     }
 
 }
-
-
 
